@@ -520,7 +520,6 @@
           <div class="action-heading"><h2 id="actionHeading">準備好出發了嗎？</h2><div class="die-face" id="dieFace" aria-label="骰子">⚄</div></div>
           <p class="action-copy" id="actionCopy">每次擲骰前進，看看森林為你準備了什麼。</p>
           <button class="action-button" id="actionButton" type="button"><span aria-hidden="true">✦</span><span id="actionLabel">開始冒險</span></button>
-          <button class="secondary-button" id="resetButton" type="button">↻　重新開始旅程</button>
         </section>
 
         <section class="info-block" aria-labelledby="inventoryTitle">
@@ -1037,7 +1036,6 @@
         else stopBackgroundMusic();
       });
       updateMusicToggle();
-      $("resetButton").addEventListener("click", resetGame);
       modalAction.addEventListener("click", closeModal);
       modal.addEventListener("click", (event) => {
         if (event.target === modal && !state.busy) closeModal();
