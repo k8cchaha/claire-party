@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f4f4e8">
   <title>Claire 的星願森林</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Ctext x='32' y='52' text-anchor='middle' font-size='52'%3E🌈%3C/text%3E%3C/svg%3E">
   <style>
     :root {
       color-scheme: light;
@@ -118,6 +119,10 @@
     }
     .dev-game-button:hover { background: var(--leaf-light); }
     .dev-game-button:active { transform: translateY(1px); }
+    .dev-move-form { display: flex; align-items: center; gap: 8px; margin-bottom: 11px; }
+    .dev-move-input { width: 120px; min-width: 0; min-height: 40px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; color: var(--forest); background: var(--paper-bright); font: inherit; font-size: 16px; }
+    .dev-move-input:focus-visible { outline: 3px solid #d27398; outline-offset: 2px; }
+    .dev-move-form :disabled { opacity: .5; cursor: not-allowed; }
     .map-count { color: var(--forest); font-size: 12px; font-weight: 900; white-space: nowrap; }
 
     .map-frame {
@@ -339,6 +344,8 @@
       box-shadow: 0 0 0 2px #d5c6a2, 0 6px 0 #b6a57d;
       transition: transform 1.45s cubic-bezier(.12,.72,.15,1);
     }
+    .wheel.is-coin { background: conic-gradient(#f3c75e 0 72deg, #84c8bf 72deg 144deg, #df91ac 144deg 216deg, #c4a1df 216deg 288deg, #f1b879 288deg 360deg); }
+    .wheel-number { position: absolute; transform: translate(-50%, -50%); color: #263d32; font-size: 16px; font-weight: 900; line-height: 1; }
     .wheel-pointer { position: absolute; z-index: 2; top: -11px; left: calc(50% - 9px); width: 0; height: 0; border-right: 9px solid transparent; border-bottom: 18px solid #263d32; border-left: 9px solid transparent; }
     .wheel::after { position: absolute; inset: 42px; border: 3px solid #fff8e8; border-radius: 50%; background: #314f41; content: "✦"; color: #fff8e8; display: grid; place-items: center; font-size: 17px; }
     .modal-action { min-width: 150px; min-height: 44px; padding: 9px 20px; border: 0; border-radius: 3px 12px 3px 12px; color: #fffaf0; background: var(--forest); box-shadow: 0 4px 0 #203c32; font-weight: 900; cursor: pointer; }
@@ -381,7 +388,7 @@
     .memory-difficulty { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding: 30px 0 12px; }
     .memory-difficulty-button { display: grid; justify-items: center; align-content: center; gap: 12px; min-width: 0; min-height: 190px; padding: 20px 12px; border: 2px solid var(--memory-border); border-radius: 20px; color: var(--memory-deep); background: var(--memory-soft); font-family: var(--serif); font-size: clamp(26px, 6vw, 36px); font-weight: 900; box-shadow: 0 5px 0 var(--memory-border); cursor: pointer; }
     .memory-difficulty-art { display: block; width: clamp(72px, 20vw, 100px); height: clamp(72px, 20vw, 100px); padding: 5px; border-radius: 50%; background: #fff7fb; object-fit: contain; pointer-events: none; }
-    .memory-difficulty-button:is([data-memory-mode="hard"], [data-collect-mode="hard"], [data-snake-mode="hard"]) { color: #fff; background: var(--memory-purple); border-color: var(--memory-purple); box-shadow: 0 5px 0 var(--memory-deep); }
+    .memory-difficulty-button:is([data-memory-mode="hard"], [data-collect-mode="hard"], [data-snake-mode="hard"], [data-compare-mode="hard"], [data-chase-mode="hard"]) { color: #fff; background: var(--memory-purple); border-color: var(--memory-purple); box-shadow: 0 5px 0 var(--memory-deep); }
     .memory-difficulty-button:not(:disabled):hover { filter: brightness(1.05); }
     .memory-difficulty-button:not(:disabled):active { transform: translateY(3px); box-shadow: none; }
     .memory-board-wrap { position: relative; }
@@ -513,6 +520,82 @@
       .snake-dialog[data-phase="preview"] .snake-status { grid-column: 1 / -1; grid-row: 2; }
     }
 
+    .compare-dialog { width: min(900px, calc(100% - 32px)); }
+    .compare-dialog .memory-header { align-items: center; }
+    .compare-dialog:is([data-mode="easy"], [data-mode="normal"]) { width: min(590px, calc(100% - 32px)); }
+    .compare-dialog .memory-difficulty { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .compare-dialog .memory-difficulty-button:disabled { opacity: .5; cursor: not-allowed; }
+    .compare-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+    .compare-toolbar .memory-action { min-width: 64px; padding: 7px 12px; }
+    .compare-toolbar .memory-timer { margin-left: auto; }
+    .compare-status { flex: 1 1 120px; margin: 0; color: #73647f; font-size: 12px; line-height: 1.4; }
+    .compare-angel { display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 5px 10px; border: 1px solid var(--memory-gold-border); border-radius: 10px; color: var(--memory-gold-ink); background: linear-gradient(135deg, var(--memory-gold-light), var(--memory-gold)); font-weight: 900; cursor: pointer; }
+    .compare-angel:not(:disabled) { box-shadow: 0 0 12px rgba(212,163,64,.4); }
+    .compare-angel:disabled { border-color: #c8c3cc; color: #88818f; background: #e4e0e8; cursor: not-allowed; }
+    .compare-angel small { display: block; font-size: 10px; }
+    .compare-progress { display: flex; justify-content: space-between; gap: 8px; margin: 0 0 8px; color: var(--memory-deep); font-size: 12px; font-variant-numeric: tabular-nums; }
+    .compare-grid { gap: clamp(3px, .8vw, 8px); }
+    .compare-grid.is-normal-play .compare-card:nth-child(13) { grid-column: 2; }
+    .compare-card { aspect-ratio: 3 / 5; border-radius: clamp(4px, 1vw, 10px); }
+    .compare-card .memory-face { border-width: 1px; }
+    .compare-card .memory-front { background: #e9ddc9; }
+    .compare-card .memory-back::before { inset: 4px; border-radius: 4px; }
+    .compare-card .memory-back-star { font-size: clamp(14px, 3vw, 32px); }
+    .compare-card .memory-back-number { right: 4px; bottom: 3px; font-size: clamp(7px, 1.2vw, 10px); }
+    .compare-card.is-matched { outline: 2px solid #558264; outline-offset: -1px; }
+    .compare-card.is-matched::after { position: absolute; z-index: 3; top: 3px; right: 3px; padding: 1px 3px; border-radius: 4px; color: #fff; background: #558264; font-size: clamp(9px, 1.5vw, 15px); content: "✓"; pointer-events: none; }
+    .compare-card.is-mismatch { outline: 2px solid #cf315b; outline-offset: -1px; }
+    .compare-card.is-first { outline: 2px solid var(--memory-gold-border); outline-offset: -1px; }
+    .compare-result { margin: 10px 0; padding: 10px; border: 1px solid var(--memory-border); border-radius: 12px; color: var(--memory-deep); background: var(--memory-soft); text-align: center; font-size: 14px; }
+    .compare-result strong { display: block; margin-bottom: 4px; font-family: var(--serif); font-size: 22px; }
+    @media (max-width: 420px) {
+      .compare-dialog { padding: 12px; }
+      .compare-dialog .memory-difficulty { grid-template-columns: 1fr; gap: 10px; padding-top: 16px; }
+      .compare-dialog .memory-difficulty-button { grid-template-columns: auto 1fr; min-height: 88px; padding: 10px 16px; font-size: 26px; }
+      .compare-dialog .memory-difficulty-button .snake-difficulty-art { width: 62px; height: 62px; font-size: 40px; }
+      .compare-toolbar { gap: 6px; }
+      .compare-status { flex-basis: 100%; }
+    }
+
+    .chase-dialog { width: min(780px, calc(100% - 32px)); }
+    .chase-dialog .memory-header { align-items: center; }
+    .chase-dialog .memory-difficulty { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .chase-dialog .memory-difficulty-button:disabled { opacity: .5; cursor: not-allowed; }
+    .chase-dialog .chase-math-art { color: var(--memory-deep); font-family: var(--sans); font-size: 24px; font-weight: 900; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .chase-toolbar { display: flex; align-items: center; gap: 10px; margin: 10px 0; }
+    .chase-status { flex: 1; margin: 0; color: #73647f; font-size: 13px; line-height: 1.5; }
+    .chase-question { margin: 12px 0; padding: 12px 8px; border: 2px solid var(--memory-border); border-radius: 16px; color: var(--memory-deep); background: var(--memory-soft); font-size: clamp(28px, 6vw, 42px); font-weight: 900; font-variant-numeric: tabular-nums; text-align: center; }
+    .chase-stage { position: relative; height: clamp(200px, 32vw, 280px); overflow: hidden; border: 2px solid var(--memory-border); border-radius: 16px; background: linear-gradient(#e7dff8 0%, #faf5ff 56%, #c5dcae 56%, #b5cf9d 67%, #797383 67%); }
+    .chase-cloud { position: absolute; top: 12%; color: #fff; font-size: 42px; opacity: .8; }
+    .chase-road-line { position: absolute; right: 0; bottom: 13%; left: 0; height: 4px; background: repeating-linear-gradient(90deg, #fff8da 0 25px, transparent 25px 48px); }
+    .chase-finish { position: absolute; z-index: 1; left: 93%; bottom: 8%; width: 3%; height: 38%; background: repeating-conic-gradient(#4d405a 0% 25%, #fff 0% 50%) 0 0 / 12px 12px; }
+    .chase-finish::before { position: absolute; right: -5px; bottom: calc(100% + 8px); color: var(--memory-deep); font-size: 12px; font-weight: 900; white-space: nowrap; content: "終點"; }
+    .chase-truck { position: absolute; z-index: 2; bottom: 18%; width: 28%; line-height: 0; }
+    .chase-truck svg { display: block; width: 100%; height: auto; }
+    .chase-bike { position: absolute; z-index: 3; bottom: 18%; width: 16%; transform: translateX(-50%); }
+    .chase-bike img { display: block; width: 100%; height: auto; object-fit: contain; }
+    .chase-stars { position: absolute; right: -15%; bottom: 98%; left: -15%; color: #a56a10; font-size: clamp(17px, 3vw, 26px); font-weight: 900; text-align: center; white-space: nowrap; }
+    .chase-bike.is-stunned img { filter: grayscale(.5); }
+    .chase-progress { display: flex; justify-content: space-between; gap: 8px; margin: 8px 0; color: var(--memory-deep); font-size: 12px; font-variant-numeric: tabular-nums; }
+    .chase-answer-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; padding: 4px; border-radius: 14px; }
+    .chase-answer { min-width: 0; width: 100%; padding: 11px 12px; border: 2px solid var(--memory-border); border-radius: 12px; color: var(--memory-deep); background: #fff; font-size: 22px; font-variant-numeric: tabular-nums; }
+    .chase-answer:focus-visible { outline: 3px solid #d27398; outline-offset: 2px; }
+    .chase-answer:read-only { background: #f2edf5; }
+    .chase-answer-row.is-wrong { background: #fce1e7; }
+    .chase-answer-row.is-wrong .chase-answer { border-color: #ca365c; background: #fff0f3; }
+    .chase-answer-row .memory-action { min-width: 94px; padding: 10px 14px; }
+    .chase-result { margin: 12px 0 0; padding: 16px; border: 2px solid var(--memory-border); border-radius: 16px; color: var(--memory-deep); background: var(--memory-soft); text-align: center; }
+    .chase-result strong { display: block; margin-bottom: 5px; font-family: var(--serif); font-size: 25px; }
+    @media (max-width: 420px) {
+      .chase-dialog { padding: 12px; }
+      .chase-dialog .memory-difficulty { grid-template-columns: 1fr; gap: 10px; padding-top: 16px; }
+      .chase-dialog .memory-difficulty-button { grid-template-columns: auto 1fr; min-height: 88px; padding: 10px 16px; font-size: 26px; }
+      .chase-dialog .snake-difficulty-art { width: 62px; height: 62px; font-size: 40px; }
+      .chase-dialog .chase-math-art { font-size: 17px; }
+      .chase-answer { padding: 10px; font-size: 20px; }
+      .chase-answer-row .memory-action { min-width: 84px; padding: 10px; }
+    }
+
     @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
     @keyframes pop-in { from { transform: translateY(12px) scale(.96); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
     @keyframes die-roll { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-12deg) scale(1.05); } 55% { transform: rotate(10deg) scale(.96); } 80% { transform: rotate(-5deg); } }
@@ -589,6 +672,10 @@
           <button class="dev-game-button" type="button" data-minigame="9">小遊戲9</button>
           <button class="dev-game-button" type="button" data-minigame="10">小遊戲10</button>
         </div>
+        <form class="dev-move-form" id="devMoveForm" aria-label="測試角色移動步數">
+          <input class="dev-move-input" id="devMoveSteps" type="number" min="1" step="1" required placeholder="移動步數" aria-label="移動步數">
+          <button class="dev-game-button" id="devMoveGo" type="submit">Go</button>
+        </form>
 
         <div class="map-frame" id="mapFrame" aria-label="生肖森林石板路">
           <div class="map-image-stack" aria-hidden="true">
@@ -717,7 +804,7 @@
       <h2 class="modal-title" id="modalTitle">發現一份驚喜</h2>
       <div class="wheel-wrap" id="fateWheel" aria-hidden="true" hidden><div class="wheel" id="wheelDisc"></div><span class="wheel-pointer"></span></div>
       <p class="modal-text" id="modalText"></p>
-      <p class="grand-note" id="grandNote" hidden>真正的生日禮物，由家人為你準備 ✦</p>
+      <p class="grand-note" id="grandNote" hidden>最大的生日禮物，由家人為你準備 ✦</p>
       <button class="modal-action" id="modalAction" type="button">繼續旅程</button>
     </div>
   </div>
@@ -805,7 +892,7 @@
     </header>
     <section class="memory-difficulty" id="snakeDifficulty" aria-label="選擇難度">
       <button class="memory-difficulty-button" id="snakeNormal" type="button" data-snake-mode="normal"><span class="snake-difficulty-art" aria-hidden="true">🐍</span><span>一般</span></button>
-      <button class="memory-difficulty-button" id="snakeHard" type="button" data-snake-mode="hard"><span class="snake-difficulty-art" aria-hidden="true">🍉</span><span>困難</span></button>
+      <button class="memory-difficulty-button" id="snakeHard" type="button" data-snake-mode="hard"><img class="memory-difficulty-art snake-difficulty-art" src="common/snackking.png" alt="" draggable="false"><span>困難</span></button>
     </section>
     <section id="snakeGamePanel" aria-label="一般模式" hidden>
       <div class="snake-toolbar">
@@ -820,6 +907,92 @@
       <section class="memory-reward-panel" id="snakeRewardPanel" aria-label="貪食蛇獎勵" hidden>
         <div class="memory-reward-stage" id="snakeRewardStage" aria-hidden="true"></div>
         <p class="memory-reward-message" id="snakeRewardMessage" role="status"></p>
+      </section>
+    </section>
+  </dialog>
+
+  <dialog class="memory-dialog compare-dialog" id="compareDialog" aria-labelledby="compareTitle">
+    <header class="memory-header">
+      <h2 class="memory-title" id="compareTitle">配對遊戲</h2>
+      <button class="memory-close" id="compareClose" type="button" aria-label="關閉配對遊戲">×</button>
+    </header>
+    <section class="memory-difficulty" id="compareDifficulty" aria-label="選擇難度">
+      <button class="memory-difficulty-button" id="compareEasy" type="button" data-compare-mode="easy"><span class="snake-difficulty-art" aria-hidden="true">👶</span><span>簡單</span></button>
+      <button class="memory-difficulty-button" id="compareNormal" type="button" data-compare-mode="normal"><span class="snake-difficulty-art" aria-hidden="true">👩</span><span>一般</span></button>
+      <button class="memory-difficulty-button" id="compareHard" type="button" data-compare-mode="hard"><span class="snake-difficulty-art" aria-hidden="true">🤯</span><span>困難</span></button>
+    </section>
+    <section id="compareGamePanel" aria-label="困難模式" hidden>
+      <div class="compare-toolbar">
+        <button class="memory-action" id="compareStart" type="button" disabled>開始</button>
+        <button class="memory-action" id="compareReward" type="button" disabled hidden>獲取獎勵</button>
+        <button class="compare-angel" id="compareAngel" type="button" disabled hidden><span aria-hidden="true">👼</span><span>天使<small id="compareAngelUses">剩餘 1 次</small></span></button>
+        <div class="memory-timer" id="compareTimer" role="timer" aria-label="記憶剩餘時間" hidden>剩下 <strong id="compareSeconds">30</strong> 秒</div>
+        <p class="compare-status" id="compareStatus" role="status"></p>
+      </div>
+      <div class="compare-progress" id="compareProgress" hidden><span id="comparePairs">配對 0 / 12</span><span id="compareMistakes">錯誤 0 / 3</span></div>
+      <div class="memory-board-wrap" id="compareBoardPanel">
+        <div class="memory-grid compare-grid" id="compareBoard" aria-label="配對卡牌"></div>
+        <div class="memory-count-in" id="compareCountIn" aria-live="polite" hidden></div>
+      </div>
+      <p class="compare-result" id="compareResult" role="status" hidden></p>
+      <section class="memory-reward-panel" id="compareRewardPanel" aria-label="配對遊戲獎勵" hidden>
+        <div class="memory-reward-stage" id="compareRewardStage" aria-hidden="true"></div>
+        <p class="memory-reward-message" id="compareRewardMessage" role="status"></p>
+      </section>
+    </section>
+  </dialog>
+
+  <dialog class="memory-dialog chase-dialog" id="chaseDialog" aria-labelledby="chaseTitle">
+    <header class="memory-header">
+      <h2 class="memory-title" id="chaseTitle">機車追逐(數學題)</h2>
+      <button class="memory-close" id="chaseClose" type="button" aria-label="關閉機車追逐(數學題)">×</button>
+    </header>
+    <section class="memory-difficulty" id="chaseDifficulty" aria-label="選擇難度">
+      <button class="memory-difficulty-button" type="button" data-chase-mode="easy"><span class="snake-difficulty-art chase-math-art" aria-hidden="true">1+1</span><span>簡單</span></button>
+      <button class="memory-difficulty-button" type="button" data-chase-mode="normal"><span class="snake-difficulty-art chase-math-art" aria-hidden="true">12×3</span><span>一般</span></button>
+      <button class="memory-difficulty-button" type="button" data-chase-mode="hard"><span class="snake-difficulty-art chase-math-art" aria-hidden="true">144÷8</span><span>困難</span></button>
+    </section>
+    <section id="chaseGamePanel" aria-label="數學追逐賽道" hidden>
+      <div class="chase-toolbar">
+        <button class="memory-action" id="chaseStart" type="button" disabled>開始</button>
+        <button class="memory-action" id="chaseReward" type="button" disabled hidden>獲取獎勵</button>
+        <p class="chase-status" id="chaseStatus" role="status"></p>
+      </div>
+      <p class="chase-question" id="chaseQuestion" aria-live="polite" aria-atomic="true">準備出發！</p>
+      <div class="chase-stage" id="chaseStage" role="img" aria-label="左側貨車追趕機車，右側為終點">
+        <span class="chase-cloud" style="left: 12%" aria-hidden="true">☁</span>
+        <span class="chase-cloud" style="left: 65%; top: 6%" aria-hidden="true">☁</span>
+        <div class="chase-road-line" aria-hidden="true"></div>
+        <div class="chase-finish" aria-hidden="true"></div>
+        <div class="chase-truck" id="chaseTruck" aria-hidden="true">
+          <svg viewBox="0 0 280 150" xmlns="http://www.w3.org/2000/svg">
+            <rect x="0" y="12" width="183" height="106" rx="6" fill="#896ca7" stroke="#493356" stroke-width="4"/>
+            <path d="M15 22v82m27-82v82m27-82v82m27-82v82m27-82v82m27-82v82m20-82v82" stroke="#bba1d3" stroke-width="5"/>
+            <path d="M184 43h52l33 37v38h-85z" fill="#f1b45f" stroke="#493356" stroke-width="4"/>
+            <path d="M207 51h23l25 29h-48z" fill="#d7f0f5" stroke="#493356" stroke-width="3"/>
+            <path d="M198 86h60m-62 10h13" stroke="#a87239" stroke-width="4"/>
+            <rect x="263" y="94" width="11" height="10" rx="2" fill="#fff5bf"/>
+            <rect x="0" y="115" width="280" height="11" rx="3" fill="#493356"/>
+            <g fill="#453c4d" stroke="#2d2635" stroke-width="3"><circle cx="37" cy="128" r="19"/><circle cx="87" cy="128" r="19"/><circle cx="230" cy="128" r="19"/></g>
+            <g fill="#bbb1c4"><circle cx="37" cy="128" r="9"/><circle cx="87" cy="128" r="9"/><circle cx="230" cy="128" r="9"/></g>
+          </svg>
+        </div>
+        <div class="chase-bike" id="chaseBike" aria-hidden="true">
+          <span class="chase-stars" id="chaseStars" hidden>✦ 😵 ✦</span>
+          <img src="games/collectcoin/right.png" alt="" draggable="false">
+        </div>
+      </div>
+      <div class="chase-progress"><span id="chaseCorrect">答對 0 題</span><span id="chaseDistance">距離終點 610</span></div>
+      <form id="chaseForm" novalidate>
+        <div class="chase-answer-row" id="chaseAnswerRow">
+          <input class="chase-answer" id="chaseAnswer" type="text" inputmode="numeric" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="6" aria-label="數學題答案" placeholder="輸入答案" disabled>
+          <button class="memory-action" id="chaseSubmit" type="submit" disabled>加速！</button>
+        </div>
+      </form>
+      <section class="chase-result" id="chaseResult" role="status" tabindex="-1" hidden></section>
+      <section class="memory-reward-panel" id="chaseRewardPanel" aria-label="機車追逐(數學題)獎勵" hidden>
+        <div class="memory-reward-stage" id="chaseRewardStage" aria-hidden="true"></div>
+        <p class="memory-reward-message" id="chaseRewardMessage" role="status"></p>
       </section>
     </section>
   </dialog>
@@ -967,6 +1140,8 @@
           : state.busy ? "酷洛米正沿著石板路前進……" : state.started ? "每次擲骰前進，看看森林為你準備了什麼。" : "擲出第一顆骰子，開啟你的生日旅程。";
         $("actionLabel").textContent = state.started ? (state.gameOver ? "再玩一次" : "擲骰前進") : "開始冒險";
         actionButton.disabled = state.busy;
+        $("devMoveSteps").disabled = state.busy || state.gameOver;
+        $("devMoveGo").disabled = state.busy || state.gameOver;
       }
 
       function addLog(icon, text) {
@@ -1006,13 +1181,14 @@
         $("grandNote").hidden = !grand;
         $("fateWheel").hidden = !wheel;
         modalAction.textContent = action;
+        modalAction.disabled = false;
         state.modalAction = onClose || null;
         modal.hidden = false;
         modalAction.focus({ preventScroll: true });
       }
 
       function closeModal() {
-        if (modal.hidden) return;
+        if (modal.hidden || modalAction.disabled) return;
         modal.hidden = true;
         const next = state.modalAction;
         state.modalAction = null;
@@ -1020,26 +1196,56 @@
         else updateToken();
       }
 
-      function spinFate({ guaranteed = false, onClose } = {}) {
-        let result;
-        if (guaranteed) {
-          result = FATE_RESULTS[2];
-        } else {
-          result = FATE_RESULTS[state.fateSpins % FATE_RESULTS.length];
-          state.fateSpins++;
+      async function spinCoins(onClose) {
+        const coins = 2 + Math.floor(Math.random() * 4);
+        const wheel = $("wheelDisc");
+        wheel.classList.add("is-coin");
+        wheel.replaceChildren();
+        for (let number = 1; number <= 5; number++) {
+          const angle = ((number - 1) * 72 + 36) * Math.PI / 180;
+          const label = document.createElement("span");
+          label.className = "wheel-number";
+          label.textContent = String(number);
+          label.style.left = `${50 + Math.sin(angle) * 36}%`;
+          label.style.top = `${50 - Math.cos(angle) * 36}%`;
+          wheel.appendChild(label);
         }
+        wheel.hidden = false;
+        wheel.style.transition = "none";
+        wheel.style.transform = "rotate(0deg)";
+        openModal({ icon: "🪙", kicker: "金幣轉盤 · 1～5 枚", title: "轉出你的森林金幣！", text: "轉盤上有 1～5，看看這次會得到幾枚金幣！", action: "轉盤轉動中…", wheel: true }, onClose);
+        modalAction.disabled = true;
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+        wheel.style.transition = "transform 1.45s cubic-bezier(.12,.72,.15,1)";
+        wheel.style.transform = `rotate(${1080 + 360 - ((coins - 1) * 72 + 36)}deg)`;
+        await wait(1500);
+        state.coins += coins;
+        updateToken();
+        addLog("🪙", `金幣轉盤轉出 ${coins} 枚森林金幣。`);
+        $("modalTitle").textContent = `獲得 ${coins} 枚金幣！`;
+        $("modalText").textContent = `轉盤停在 ${coins}，Claire 收下 ${coins} 枚森林金幣。`;
+        modalAction.textContent = "繼續旅程";
+        modalAction.disabled = false;
+        modalAction.focus({ preventScroll: true });
+      }
+
+      function spinFate({ onClose } = {}) {
+        const result = FATE_RESULTS[state.fateSpins % FATE_RESULTS.length];
+        state.fateSpins++;
         if (result.coins) state.coins += result.coins;
         if (result.item) state.inventory.push(result.item);
         if (result.grandPrize) state.grandPrize = true;
         renderInventory();
         updateToken();
         const wheel = $("wheelDisc");
+        wheel.classList.remove("is-coin");
+        wheel.replaceChildren();
         wheel.hidden = false;
         wheel.style.transition = "none";
         wheel.style.transform = "rotate(0deg)";
         openModal({
           icon: result.icon,
-          kicker: guaranteed ? "終點的生日命運" : "命運轉盤 · 試試今天的手氣",
+          kicker: "命運轉盤 · 試試今天的手氣",
           title: result.title,
           text: result.text,
           action: "繼續旅程",
@@ -1075,8 +1281,7 @@
         const landed = tiles[state.position];
         const finishAfterModal = () => {
           if (state.position === FINISH_INDEX) {
-            if (state.grandPrize) showFinish();
-            else spinFate({ guaranteed: true, onClose: showFinish });
+            showFinish();
           } else {
             state.busy = false;
             updateToken();
@@ -1085,10 +1290,7 @@
 
         switch (landed.event) {
           case "coin":
-            state.coins += 5;
-            updateToken();
-            addLog("🪙", "撿到 5 枚森林金幣。");
-            openModal({ icon: "🪙", title: "叮！找到金幣", text: "陽光照亮石縫，Claire 撿到 5 枚森林金幣。" }, finishAfterModal);
+            void spinCoins(finishAfterModal);
             break;
           case "treasure":
             state.coins += 10;
@@ -1122,8 +1324,7 @@
             addLog("🏁", "抵達星願森林終點。");
             stopBackgroundMusic();
             playVictoryMusic();
-            if (state.grandPrize) showFinish();
-            else spinFate({ guaranteed: true, onClose: showFinish });
+            showFinish();
             break;
           default:
             addLog(landed.animal.emoji, `經過第 ${state.position + 1} 格的${landed.animal.name}生肖花徑。`);
@@ -1292,7 +1493,11 @@
         window.clearInterval(rollTicker);
         die.classList.remove("rolling");
         die.textContent = String(result);
-        const destination = Math.min(FINISH_INDEX, state.position + result);
+        await moveSteps(result);
+      }
+
+      async function moveSteps(steps) {
+        const destination = Math.min(FINISH_INDEX, state.position + steps);
         while (state.position < destination) {
           state.position++;
           updateToken();
@@ -1300,6 +1505,16 @@
         }
         resolveLanding();
       }
+
+      $("devMoveForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const steps = $("devMoveSteps").valueAsNumber;
+        if (!Number.isSafeInteger(steps) || steps < 1 || state.busy || state.gameOver || !modal.hidden || document.querySelector("dialog[open]")) return;
+        state.started = true;
+        state.busy = true;
+        updateToken();
+        void moveSteps(steps);
+      });
 
       function resetGame() {
         state.position = 0;
@@ -1681,7 +1896,7 @@
         }
 
         function openMemory() {
-          if (dialog.open || $("collectDialog").open || $("snakeDialog").open || state.busy || !modal.hidden) return;
+          if (dialog.open || $("collectDialog").open || $("snakeDialog").open || $("compareDialog").open || $("chaseDialog").open || state.busy || !modal.hidden) return;
           dispose();
           session = { controller: new AbortController(), animations: new Set(), tones: new Set(), mode: null, correctCount: null, rewardClaimed: false };
           delete dialog.dataset.mode;
@@ -2274,7 +2489,7 @@
           opener.focus({ preventScroll: true });
         }
         function openCollect() {
-          if (dialog.open || $("memoryDialog").open || $("snakeDialog").open || state.busy || !modal.hidden) return;
+          if (dialog.open || $("memoryDialog").open || $("snakeDialog").open || $("compareDialog").open || $("chaseDialog").open || state.busy || !modal.hidden) return;
           dispose();
           session = { closed: false, mode: null, duration: MODES.easy.duration, lastPose: "rest", boostUntil: 0, shield: false, speedCollected: false, shieldCollected: false, keys: new Set(), items: [], tones: new Set(), animations: new Set(), rewardClaimed: false, rewardTimer: null, finalScore: null, music: null, musicFast: false, restoreMapMusic: false, counts: Object.fromEntries([...ITEMS, ...HARD_EXTRAS].map((item) => [item.key, 0])), x: WIDTH / 2, frame: null, endTimer: null };
           previousOverflow = document.body.style.overflow;
@@ -2739,7 +2954,7 @@
           opener.focus({ preventScroll: true });
         }
         function openSnake() {
-          if (dialog.open || $("memoryDialog").open || $("collectDialog").open || state.busy || !modal.hidden) return;
+          if (dialog.open || $("memoryDialog").open || $("collectDialog").open || $("compareDialog").open || $("chaseDialog").open || state.busy || !modal.hidden) return;
           dispose();
           session = { closed: false, mode: null, snake: [8 * SIZE + 8], fruits: new Map(), obstacles: new Set(), direction: null, turns: [], completed: 0, eaten: 0, lives: 2, hit: false, frame: null, endTimer: null, tones: new Set(), animations: new Set(), rewardClaimed: false, rewardTimer: null, accumulator: 0, lastFrame: 0, deadline: 0 };
           previousOverflow = document.body.style.overflow;
@@ -2949,6 +3164,763 @@
           if (document.hidden) stopTones(run);
           else if (run.lastFrame >= run.deadline) finish(run, "時間到！");
         });
+      })();
+
+      // Pair matching has its own card identities and cancellable round lifecycle.
+      (() => {
+        const opener = document.querySelector('[data-minigame="4"]');
+        const dialog = $("compareDialog");
+        const board = $("compareBoard");
+        const start = $("compareStart");
+        const angel = $("compareAngel");
+        const rewardButton = $("compareReward");
+        const status = $("compareStatus");
+        const countIn = $("compareCountIn");
+        const timer = $("compareTimer");
+        const animals = ["鼠", "牛", "虎", "兔", "龍", "蛇", "馬", "羊", "猴", "雞", "狗", "豬"];
+        const MODES = {
+          easy: { name: "簡單", pairs: 6, seconds: 10, mistakeLimit: 2, angelUses: 0, directory: "amount6", prefix: "hunter", previewColumns: 3, playColumns: 4, rewards: [1, 1, 1, 2, 3, 4, 4] },
+          normal: { name: "一般", pairs: 8, seconds: 15, mistakeLimit: 3, angelUses: 0, directory: "amount8", prefix: "img", previewColumns: 4, playColumns: 6, rewards: [1, 1, 1, 2, 3, 4, 5, 6, 6] },
+          hard: { name: "困難", pairs: 12, seconds: 30, mistakeLimit: 4, angelUses: 1, directory: "amount12", prefix: "animal", previewColumns: 6, playColumns: 8 },
+        };
+        const modeButtons = [...$("compareDifficulty").querySelectorAll("[data-compare-mode]")];
+        const matchingPhases = ["pick-first", "flip-first", "pick-second", "flip-second", "resolve", "finished"];
+        let session = null;
+        let phase = "closed";
+        let previousOverflow = "";
+        const active = (run) => session === run && !run.controller.signal.aborted && dialog.open;
+
+        function delay(milliseconds, run) {
+          return new Promise((resolve, reject) => {
+            const signal = run.controller.signal;
+            const abort = () => {
+              clearTimeout(handle);
+              signal.removeEventListener("abort", abort);
+              reject(new DOMException("Matching game closed", "AbortError"));
+            };
+            const handle = window.setTimeout(() => { signal.removeEventListener("abort", abort); resolve(); }, milliseconds);
+            signal.addEventListener("abort", abort, { once: true });
+            if (signal.aborted) abort();
+          });
+        }
+        function perform(promise, run) {
+          void promise.catch((error) => {
+            if (error.name === "AbortError" || !active(run)) return;
+            console.error("Matching game:", error);
+            closeCompare();
+            openCompare();
+            status.textContent = "遊戲中斷，請重新選擇難度。";
+          });
+        }
+        function shuffled(items) {
+          const copy = [...items];
+          for (let i = copy.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [copy[i], copy[j]] = [copy[j], copy[i]];
+          }
+          if (copy.length > 1 && copy.every((item, i) => item === items[i])) copy.push(copy.shift());
+          return copy;
+        }
+        function updateCards(run) {
+          const mode = MODES[run.mode];
+          if (!mode) return;
+          run.cards.forEach((card, index) => {
+            const covered = card.classList.contains("is-covered");
+            const matched = card.classList.contains("is-matched");
+            card.disabled = !["pick-first", "pick-second"].includes(phase) || matched || card === run.first;
+            const columns = run.columns;
+            const columnOffset = run.mode === "normal" && columns === 6 && index >= 12 ? 1 : 0;
+            const pictureLabel = run.mode === "hard" ? animals[Number(card.dataset.picture) - 1] : `圖案${card.dataset.picture}`;
+            card.setAttribute("aria-label", `第 ${Math.floor(index / columns) + 1} 列，第 ${index % columns + 1 + columnOffset} 欄，${covered ? "蓋住的卡牌" : pictureLabel}${matched ? "，已配對" : ""}`);
+            card.querySelector(".memory-front").setAttribute("aria-hidden", String(covered));
+            card.querySelector(".memory-back-number").textContent = String(index + 1);
+          });
+          angel.disabled = mode.angelUses === 0 || phase !== "pick-second" || !run.first || run.angelUses === 0;
+          $("compareAngelUses").textContent = `剩餘 ${run.angelUses} 次`;
+          angel.setAttribute("aria-label", `天使，剩餘 ${run.angelUses} 次`);
+          $("comparePairs").textContent = `配對 ${run.pairs} / ${mode.pairs}`;
+          $("compareMistakes").textContent = `錯誤 ${run.mistakes} / ${mode.mistakeLimit}`;
+        }
+        function setPhase(next, message = "") {
+          phase = next;
+          dialog.dataset.phase = next;
+          status.textContent = message;
+          $("compareDifficulty").hidden = next !== "difficulty";
+          modeButtons.forEach((button) => { button.disabled = next !== "difficulty"; });
+          $("compareGamePanel").hidden = ["difficulty", "closed"].includes(next);
+          start.hidden = !["loading", "preview", "error"].includes(next);
+          start.disabled = !["preview", "error"].includes(next);
+          start.textContent = next === "error" ? "重新載入" : "開始";
+          timer.hidden = next !== "memorize";
+          const inMatching = matchingPhases.includes(next);
+          angel.hidden = !inMatching || !session || !MODES[session.mode]?.angelUses;
+          $("compareProgress").hidden = !inMatching;
+          rewardButton.hidden = next !== "finished";
+          rewardButton.disabled = next !== "finished" || !session || session.rewardClaimed;
+          $("compareResult").hidden = next !== "finished";
+          const showingReward = ["rewarding", "rewarded"].includes(next);
+          $("compareBoardPanel").hidden = showingReward;
+          $("compareRewardPanel").hidden = !showingReward;
+          if (session) updateCards(session);
+        }
+        function buildCards(run, copies) {
+          const mode = MODES[run.mode];
+          run.cards = [];
+          run.columns = copies === 1 ? mode.previewColumns : mode.playColumns;
+          for (let copy = 0; copy < copies; copy++) {
+            for (let picture = 1; picture <= mode.pairs; picture++) {
+              const card = document.createElement("button");
+              card.type = "button";
+              card.className = "memory-card compare-card";
+              card.dataset.picture = String(picture);
+              card.dataset.cardId = `${picture}-${copy}`;
+              card.innerHTML = '<span class="memory-card-inner"><span class="memory-face memory-front"><img alt="" draggable="false"></span><span class="memory-face memory-back" aria-hidden="true"><span class="memory-back-star">✦</span><span class="memory-back-number"></span></span></span>';
+              card.querySelector("img").src = `games/compare/${mode.directory}/${mode.prefix}${picture}.png`;
+              card.addEventListener("click", () => { if (active(run)) perform(selectCard(run, card), run); });
+              run.cards.push(card);
+            }
+          }
+          board.classList.toggle("is-normal-play", run.mode === "normal" && copies === 2);
+          board.style.setProperty("--memory-columns", String(run.columns));
+          board.replaceChildren(...run.cards);
+          updateCards(run);
+        }
+        function cover(run, cards, covered, duration) {
+          board.style.setProperty("--flip-duration", `${duration}ms`);
+          cards.forEach((card) => card.classList.toggle("is-covered", covered));
+          updateCards(run);
+        }
+        async function loadPictures(run) {
+          const mode = MODES[run.mode];
+          setPhase("loading", `正在準備${mode.pairs}張圖卡…`);
+          buildCards(run, 1);
+          try {
+            await Promise.all(run.cards.map((card) => card.querySelector("img").decode()));
+            if (!active(run)) return;
+            setPhase("preview", `先認識這${mode.pairs}張牌，準備好就按開始！`);
+            start.focus({ preventScroll: true });
+            dialog.scrollTop = 0;
+          } catch {
+            if (active(run)) setPhase("error", `圖卡載入失敗，請確認 games/compare/${mode.directory}/${mode.prefix}1.png～${mode.prefix}${mode.pairs}.png 後重新載入。`);
+          }
+        }
+        function dispose() {
+          if (!session) return;
+          session.controller.abort();
+          session.animations.forEach((animation) => animation.cancel());
+          session.animations.clear();
+          session = null;
+        }
+        function closeCompare() {
+          if (!session && !dialog.open) return;
+          dispose();
+          setPhase("closed");
+          document.body.style.overflow = previousOverflow;
+          dialog.close();
+          opener.focus({ preventScroll: true });
+        }
+        function openCompare() {
+          if (dialog.open || $("memoryDialog").open || $("collectDialog").open || $("snakeDialog").open || $("chaseDialog").open || state.busy || !modal.hidden) return;
+          dispose();
+          session = { controller: new AbortController(), animations: new Set(), mode: null, columns: 0, cards: [], first: null, pairs: 0, mistakes: 0, angelUses: 0, deadline: 0, finalPairs: null, rewardClaimed: false };
+          delete dialog.dataset.mode;
+          previousOverflow = document.body.style.overflow;
+          document.body.style.overflow = "hidden";
+          board.replaceChildren();
+          countIn.hidden = true;
+          countIn.textContent = "";
+          $("compareResult").replaceChildren();
+          $("compareRewardStage").replaceChildren();
+          $("compareRewardMessage").textContent = "";
+          $("compareSeconds").textContent = "30";
+          timer.classList.remove("is-urgent");
+          setPhase("difficulty");
+          dialog.showModal();
+          $("compareEasy").focus({ preventScroll: true });
+          dialog.scrollTop = 0;
+        }
+        function chooseMode(mode) {
+          if (!session || !active(session) || phase !== "difficulty" || !Object.hasOwn(MODES, mode)) return;
+          session.mode = mode;
+          session.angelUses = MODES[mode].angelUses;
+          dialog.dataset.mode = mode;
+          $("compareGamePanel").setAttribute("aria-label", `${MODES[mode].name}模式`);
+          $("compareSeconds").textContent = String(MODES[mode].seconds);
+          perform(loadPictures(session), session);
+        }
+        async function shuffleBoard(run) {
+          for (let round = 0; round < 3; round++) {
+            const before = new Map(run.cards.map((card) => [card, card.getBoundingClientRect()]));
+            run.cards = shuffled(run.cards);
+            board.replaceChildren(...run.cards);
+            updateCards(run);
+            const animations = [];
+            if (!reducedMotion.matches) {
+              run.cards.forEach((card, index) => {
+                const after = card.getBoundingClientRect();
+                const from = before.get(card);
+                const x = from.left - after.left, y = from.top - after.top;
+                card.style.zIndex = String(index + 1);
+                const animation = card.animate([
+                  { transform: `translate(${x}px, ${y}px) scale(1)` },
+                  { transform: `translate(${x * .45}px, ${y * .45}px) scale(.88)`, offset: .5 },
+                  { transform: "translate(0, 0) scale(1)" },
+                ], { duration: 1000, easing: "cubic-bezier(.45,0,.2,1)" });
+                run.animations.add(animation);
+                animations.push(animation);
+              });
+            }
+            await delay(1000, run);
+            if (!active(run)) return;
+            animations.forEach((animation) => { animation.cancel(); run.animations.delete(animation); });
+            run.cards.forEach((card) => { card.style.zIndex = ""; });
+          }
+        }
+        async function play(run) {
+          setPhase("duplicate", `每張牌都有另一半，共${MODES[run.mode].pairs}組！`);
+          $("compareClose").focus({ preventScroll: true });
+          buildCards(run, 2);
+          await Promise.all(run.cards.map((card) => card.querySelector("img").decode()));
+          if (!active(run)) return;
+          await delay(500, run);
+          if (!active(run)) return;
+          setPhase("initial-cover", "準備洗牌…");
+          cover(run, run.cards, true, 1000);
+          await delay(1000, run);
+          if (!active(run)) return;
+          setPhase("pause");
+          await delay(1000, run);
+          if (!active(run)) return;
+          setPhase("shuffle", "洗牌中…");
+          await shuffleBoard(run);
+          if (!active(run)) return;
+          countIn.hidden = false;
+          for (let number = 3; number >= 1; number--) {
+            setPhase("count-in", "準備記憶！");
+            countIn.textContent = String(number);
+            await delay(1000, run);
+            if (!active(run)) return;
+          }
+          countIn.hidden = true;
+          setPhase("reveal", "開牌！");
+          for (const card of shuffled(run.cards)) {
+            cover(run, [card], false, 300);
+            await delay(80, run);
+            if (!active(run)) return;
+          }
+          await delay(300, run);
+          if (!active(run)) return;
+          run.deadline = performance.now() + MODES[run.mode].seconds * 1000;
+          setPhase("memorize", "記住每一對的位置！");
+          while (active(run) && phase === "memorize") {
+            const remaining = Math.max(0, Math.ceil((run.deadline - performance.now()) / 1000));
+            $("compareSeconds").textContent = String(remaining);
+            timer.classList.toggle("is-urgent", remaining <= 3);
+            if (!remaining) { await endMemorize(run); return; }
+            await delay(Math.min(100, Math.max(1, run.deadline - performance.now())), run);
+          }
+        }
+        async function endMemorize(run, immediate = false) {
+          if (!active(run) || phase !== "memorize") return;
+          setPhase("final-cover", "開始配對！");
+          cover(run, run.cards, true, immediate ? 0 : 300);
+          await delay(immediate ? 0 : 300, run);
+          if (!active(run)) return;
+          setPhase("pick-first");
+          focusChoice(run);
+        }
+        function focusChoice(run) {
+          const card = run.cards.find((item) => !item.disabled);
+          (card || $("compareClose")).focus();
+        }
+        function finish(run) {
+          if (!active(run) || phase !== "resolve") return;
+          run.finalPairs = run.pairs;
+          setPhase("finished", "挑戰結束");
+          const title = document.createElement("strong");
+          const mode = MODES[run.mode];
+          title.textContent = run.pairs === mode.pairs ? `${mode.pairs}組全部配對成功！` : `錯${mode.mistakeLimit}次，挑戰結束！`;
+          $("compareResult").replaceChildren(title, document.createTextNode(`成功配對 ${run.pairs} / ${mode.pairs} 組 · 錯誤 ${run.mistakes} / ${mode.mistakeLimit} 次`));
+          dialog.scrollTop = 0;
+          rewardButton.focus({ preventScroll: true });
+        }
+        async function selectCard(run, card, assisted = false) {
+          if (!active(run) || !["pick-first", "pick-second"].includes(phase) || !run.cards.includes(card) || card === run.first || card.classList.contains("is-matched") || !card.classList.contains("is-covered")) return;
+          const firstSelection = phase === "pick-first";
+          if (assisted && (firstSelection || MODES[run.mode].angelUses === 0 || run.angelUses === 0)) return;
+          if (assisted) run.angelUses--;
+          if (firstSelection) run.first = card;
+          setPhase(firstSelection ? "flip-first" : "flip-second");
+          $("compareClose").focus({ preventScroll: true });
+          cover(run, [card], false, 300);
+          if (firstSelection) card.classList.add("is-first");
+          await delay(300, run);
+          if (!active(run)) return;
+          if (firstSelection) {
+            setPhase("pick-second", run.angelUses > 0 ? "再翻一張，或使用天使。" : "再翻一張相同的牌。");
+            focusChoice(run);
+            return;
+          }
+          setPhase("resolve");
+          const first = run.first;
+          first.classList.remove("is-first");
+          if (first.dataset.picture === card.dataset.picture) {
+            [first, card].forEach((item) => item.classList.add("is-matched"));
+            run.pairs++;
+            run.first = null;
+            updateCards(run);
+            if (run.pairs === MODES[run.mode].pairs) { finish(run); return; }
+          } else {
+            run.mistakes++;
+            [first, card].forEach((item) => item.classList.add("is-mismatch"));
+            updateCards(run);
+            status.textContent = "圖案不同，再記住它們的位置！";
+            await delay(1000, run);
+            if (!active(run)) return;
+            cover(run, [first, card], true, 300);
+            await delay(300, run);
+            if (!active(run)) return;
+            [first, card].forEach((item) => item.classList.remove("is-mismatch"));
+            run.first = null;
+            if (run.mistakes === MODES[run.mode].mistakeLimit) { finish(run); return; }
+          }
+          setPhase("pick-first", "繼續找下一對！");
+          focusChoice(run);
+        }
+        function rewardForPairs(run) {
+          const mode = MODES[run.mode];
+          if (run.mode === "hard") return run.finalPairs === mode.pairs
+            ? { coins: 0, pokeChances: 1 }
+            : { coins: Math.max(1, run.finalPairs - 3), pokeChances: 0 };
+          return { coins: mode.rewards[run.finalPairs], pokeChances: 0 };
+        }
+        async function claimReward(run) {
+          if (!active(run) || phase !== "finished" || run.rewardClaimed || run.finalPairs === null) return;
+          run.rewardClaimed = true;
+          const reward = rewardForPairs(run);
+          const coins = reward.coins;
+          const perfect = reward.pokeChances > 0;
+          state.coins += coins;
+          state.pokeChances += reward.pokeChances;
+          updateToken();
+          const stage = $("compareRewardStage");
+          stage.replaceChildren();
+          $("compareRewardMessage").textContent = perfect ? "戳戳樂 +1 次" : `獲得 ${coins} 枚森林金幣${coins === 1 ? "（參加獎）" : ""}！`;
+          setPhase("rewarding", "領取配對獎勵！");
+          $("compareClose").focus({ preventScroll: true });
+          dialog.scrollTop = 0;
+          if (perfect) {
+            const gift = document.createElement("div");
+            gift.className = "memory-reward-gift";
+            gift.innerHTML = '<span class="memory-reward-gift-icon">🎁</span><span class="memory-reward-gift-label">全對獎勵</span>';
+            stage.appendChild(gift);
+            setPhase("rewarded", "12組全對！已獲得戳戳樂 +1 次。");
+            return;
+          }
+          await delay(animateRewardCoins(stage, coins, run.animations), run);
+          if (!active(run)) return;
+          run.animations.forEach((animation) => animation.cancel());
+          run.animations.clear();
+          setPhase("rewarded", "獎勵已加入森林金幣！");
+        }
+        opener.addEventListener("click", openCompare);
+        modeButtons.forEach((button) => button.addEventListener("click", () => chooseMode(button.dataset.compareMode)));
+        start.addEventListener("click", () => {
+          if (!session || !active(session)) return;
+          if (phase === "preview") perform(play(session), session);
+          else if (phase === "error") perform(loadPictures(session), session);
+        });
+        angel.addEventListener("click", () => {
+          const run = session;
+          if (!run || !active(run) || MODES[run.mode]?.angelUses !== 1 || phase !== "pick-second" || !run.first || run.angelUses === 0) return;
+          const partner = run.cards.find((card) => card !== run.first && card.dataset.picture === run.first.dataset.picture && !card.classList.contains("is-matched") && card.classList.contains("is-covered"));
+          if (partner) perform(selectCard(run, partner, true), run);
+        });
+        rewardButton.addEventListener("click", () => { if (session) perform(claimReward(session), session); });
+        $("compareClose").addEventListener("click", closeCompare);
+        dialog.addEventListener("cancel", (event) => { event.preventDefault(); closeCompare(); });
+        dialog.addEventListener("close", () => { if (!dialog.open && session) closeCompare(); });
+        document.addEventListener("keydown", (event) => {
+          if (!dialog.open || !session) return;
+          if (event.key === "Escape") {
+            event.preventDefault(); event.stopImmediatePropagation(); closeCompare();
+          } else if (event.key === "Tab") {
+            const buttons = [...dialog.querySelectorAll("button:not(:disabled)")].filter((button) => button.getClientRects().length > 0);
+            const index = buttons.indexOf(document.activeElement);
+            const next = index < 0 ? (event.shiftKey ? buttons.length - 1 : 0) : (index + (event.shiftKey ? -1 : 1) + buttons.length) % buttons.length;
+            event.preventDefault(); event.stopImmediatePropagation(); buttons[next]?.focus();
+          }
+        }, true);
+        document.addEventListener("visibilitychange", () => {
+          const run = session;
+          if (run && active(run) && phase === "memorize" && performance.now() >= run.deadline) perform(endMemorize(run, true), run);
+        });
+      })();
+
+      // Answering arithmetic accelerates the motorcycle; rewards require an explicit claim.
+      (() => {
+        const dialog = $("chaseDialog");
+        const opener = document.querySelector('[data-minigame="5"]');
+        const modeButtons = [...dialog.querySelectorAll("[data-chase-mode]")];
+        const start = $("chaseStart");
+        const rewardButton = $("chaseReward");
+        const rewardStage = $("chaseRewardStage");
+        const rewardMessage = $("chaseRewardMessage");
+        const input = $("chaseAnswer");
+        const submit = $("chaseSubmit");
+        const status = $("chaseStatus");
+        const question = $("chaseQuestion");
+        const bike = $("chaseBike");
+        const truck = $("chaseTruck");
+        const result = $("chaseResult");
+        const answerRow = $("chaseAnswerRow");
+        const COURSE = { width: 1000, finish: 930, bikeWidth: 160, truckWidth: 280, bikeStart: 240, truckStart: 50, baseSpeed: 10, maxSpeed: 58, boost: 18, decay: 6, stun: 1 };
+        const MODES = {
+          easy: { name: "簡單", digits: 1, operations: ["+", "−", "×"], truckSpeed: 16 },
+          normal: { name: "一般", digits: 2, operations: ["+", "−", "×"], truckSpeed: 18 },
+          hard: { name: "困難", digits: 3, operations: ["+", "−", "×", "÷"], truckSpeed: 20 },
+        };
+        let session = null;
+        let phase = "closed";
+        let previousOverflow = "";
+        const active = (run) => session === run && !run.closed && dialog.open;
+        const inMotion = () => phase === "playing" || phase === "stunned";
+        const randomInt = (low, high) => low + Math.floor(Math.random() * (high - low + 1));
+        function operand(digits, minimumPlaces = 1) {
+          const places = randomInt(minimumPlaces, digits);
+          return randomInt(places === 1 ? 2 : 10 ** (places - 1), 10 ** places - 1);
+        }
+        function generateQuestion(run) {
+          const mode = MODES[run.mode];
+          const operation = mode.operations[randomInt(0, mode.operations.length - 1)];
+          const maxDigits = run.mode === "hard" && run.questionId < 3 ? 2 : mode.digits;
+          const digits = operation === "+" || operation === "×" ? Math.min(maxDigits, 2) : maxDigits;
+          let left = operand(digits);
+          let right = operation === "×" || operation === "÷" ? randomInt(2, 9) : operand(digits);
+          if (run.mode === "hard" && operation !== "÷" && left < 10 && right < 10) {
+            left = operand(digits, 2);
+          }
+          if (run.mode === "hard" && left >= 100 && right >= 100) {
+            right = operand(2);
+          }
+          if (operation === "−" && left < right) [left, right] = [right, left];
+          if (operation === "÷") {
+            // Pick a dividend digit band first, then choose one of its exact multiples.
+            const places = randomInt(run.mode === "hard" ? 2 : 1, maxDigits);
+            const low = places === 1 ? 2 : 10 ** (places - 1);
+            const high = 10 ** places - 1;
+            left = right * randomInt(Math.ceil(low / right), Math.floor(high / right));
+          }
+          const answer = operation === "+" ? left + right : operation === "−" ? left - right : operation === "×" ? left * right : left / right;
+          run.question = { id: ++run.questionId, left, right, operation, answer };
+          question.textContent = `${left} ${operation} ${right} = ?`;
+          input.value = "";
+          input.removeAttribute("aria-invalid");
+          answerRow.classList.remove("is-wrong");
+        }
+        function render(run) {
+          if (!run) return;
+          bike.style.left = `${run.x / COURSE.width * 100}%`;
+          truck.style.left = `${(run.truckFront - COURSE.truckWidth) / COURSE.width * 100}%`;
+          bike.classList.toggle("is-stunned", run.stunLeft > 0);
+          $("chaseStars").hidden = run.stunLeft <= 0;
+          $("chaseCorrect").textContent = `答對 ${run.correct} 題`;
+          $("chaseDistance").textContent = `距離終點 ${Math.max(0, Math.ceil(COURSE.finish - run.x - COURSE.bikeWidth / 2))}`;
+          if (phase === "stunned") {
+            const message = `答錯了！暈眩 ${Math.ceil(run.stunLeft)} 秒…`;
+            if (status.textContent !== message) status.textContent = message;
+          }
+        }
+        function setPhase(next, message = "") {
+          phase = next;
+          dialog.dataset.phase = next;
+          $("chaseDifficulty").hidden = next !== "difficulty";
+          $("chaseGamePanel").hidden = ["difficulty", "closed"].includes(next);
+          modeButtons.forEach((button) => { button.disabled = next !== "difficulty"; });
+          start.hidden = !["loading", "preview", "error"].includes(next);
+          start.disabled = !["preview", "error"].includes(next);
+          start.textContent = next === "error" ? "重新載入" : "開始";
+          $("chaseForm").hidden = !["playing", "stunned", "paused"].includes(next);
+          input.disabled = !["playing", "stunned", "paused"].includes(next);
+          input.readOnly = next !== "playing";
+          submit.disabled = next !== "playing";
+          result.hidden = next !== "finished";
+          rewardButton.hidden = next !== "finished";
+          rewardButton.disabled = next !== "finished" || Boolean(session?.rewardClaimed);
+          $("chaseRewardPanel").hidden = !["rewarding", "rewarded"].includes(next);
+          question.hidden = ["rewarding", "rewarded"].includes(next);
+          $("chaseStage").hidden = ["rewarding", "rewarded"].includes(next);
+          $("chaseCorrect").parentElement.hidden = ["rewarding", "rewarded"].includes(next);
+          status.textContent = message;
+          render(session);
+        }
+        function dispose() {
+          if (!session) return;
+          session.closed = true;
+          cancelAnimationFrame(session.frame);
+          clearTimeout(session.rewardTimer);
+          session.animations.forEach((animation) => animation.cancel());
+          session.animations.clear();
+          session = null;
+        }
+        function closeChase() {
+          if (!session && !dialog.open) return;
+          dispose();
+          setPhase("closed");
+          document.body.style.overflow = previousOverflow;
+          dialog.close();
+          opener.focus({ preventScroll: true });
+        }
+        function openChase() {
+          if (dialog.open || $("memoryDialog").open || $("collectDialog").open || $("snakeDialog").open || $("compareDialog").open || state.busy || !modal.hidden) return;
+          dispose();
+          session = { closed: false, mode: null, frame: null, animations: new Set(), x: COURSE.bikeStart, truckFront: COURSE.truckStart, speed: COURSE.baseSpeed, stunLeft: 0, correct: 0, question: null, questionId: 0, lastWall: 0, elapsed: 0, composing: false, resumePhase: null, finalResult: null, rewardClaimed: false, rewardTimer: null };
+          previousOverflow = document.body.style.overflow;
+          document.body.style.overflow = "hidden";
+          delete dialog.dataset.mode;
+          question.textContent = "準備出發！";
+          result.replaceChildren();
+          rewardStage.replaceChildren();
+          rewardMessage.textContent = "";
+          input.value = "";
+          input.removeAttribute("aria-invalid");
+          answerRow.classList.remove("is-wrong");
+          setPhase("difficulty");
+          dialog.showModal();
+          modeButtons[0].focus({ preventScroll: true });
+          dialog.scrollTop = 0;
+        }
+        async function loadRider(run) {
+          setPhase("loading", "正在準備機車…");
+          try {
+            await bike.querySelector("img").decode();
+            if (!active(run)) return;
+            setPhase("preview", "快速答對就能加速，答錯會暈眩1秒！");
+            start.focus({ preventScroll: true });
+          } catch {
+            if (!active(run)) return;
+            setPhase("error", "機車圖案載入失敗，請重新載入。");
+            start.focus({ preventScroll: true });
+          }
+        }
+        function chooseMode(mode) {
+          const run = session;
+          if (!run || !active(run) || phase !== "difficulty" || !Object.hasOwn(MODES, mode)) return;
+          run.mode = mode;
+          dialog.dataset.mode = mode;
+          $("chaseGamePanel").setAttribute("aria-label", `${MODES[mode].name}數學追逐`);
+          void loadRider(run);
+        }
+        function finish(run, won) {
+          if (!active(run) || !inMotion()) return;
+          cancelAnimationFrame(run.frame);
+          run.frame = null;
+          run.animations.forEach((animation) => animation.cancel());
+          run.animations.clear();
+          const title = document.createElement("strong");
+          title.textContent = won ? "安全抵達終點！🏁" : "被貨車追上了！";
+          run.finalResult = { won, correct: run.correct };
+          result.replaceChildren(title, document.createTextNode(`答對 ${run.correct} 題 · ${MODES[run.mode].name}模式`));
+          setPhase("finished", won ? "成功甩開貨車！" : "挑戰結束");
+          dialog.scrollTop = 0;
+          rewardButton.focus({ preventScroll: true });
+        }
+        function rewardForResult(run) {
+          const { won, correct } = run.finalResult;
+          if (run.mode === "hard") {
+            if (won) return { coins: 0, pokeChances: 1 };
+            return { coins: correct >= 7 ? 6 : correct >= 3 ? correct - 1 : 1, pokeChances: 0 };
+          }
+          if (run.mode === "normal") return { coins: won ? 6 : correct >= 6 ? 4 : correct >= 4 ? correct - 2 : 1, pokeChances: 0 };
+          return { coins: won ? 3 : 1, pokeChances: 0 };
+        }
+        function claimReward(run) {
+          if (!run || !active(run) || phase !== "finished" || !run.finalResult || run.rewardClaimed) return;
+          // Credit once before animation, so closing cannot lose or duplicate the reward.
+          run.rewardClaimed = true;
+          const reward = rewardForResult(run);
+          state.coins += reward.coins;
+          state.pokeChances += reward.pokeChances;
+          updateToken();
+          rewardStage.replaceChildren();
+          rewardMessage.textContent = reward.pokeChances ? "戳戳樂 +1 次" : `獲得 ${reward.coins} 枚森林金幣！`;
+          setPhase("rewarding", "領取你的獎勵！");
+          $("chaseClose").focus({ preventScroll: true });
+          dialog.scrollTop = 0;
+          if (reward.pokeChances) {
+            const gift = document.createElement("div");
+            gift.className = "memory-reward-gift";
+            gift.innerHTML = '<span class="memory-reward-gift-icon">🎁</span><span class="memory-reward-gift-label">戳戳樂機會</span>';
+            rewardStage.appendChild(gift);
+            setPhase("rewarded", "已獲得戳戳樂 +1 次！");
+            return;
+          }
+          const duration = animateRewardCoins(rewardStage, reward.coins, run.animations);
+          run.rewardTimer = window.setTimeout(() => {
+            if (!active(run) || phase !== "rewarding") return;
+            run.rewardTimer = null;
+            run.animations.forEach((animation) => animation.cancel());
+            run.animations.clear();
+            setPhase("rewarded", "獎勵已加入森林金幣！");
+          }, duration);
+        }
+        // Event times within a constant-acceleration segment, using stable quadratic roots.
+        function collisionTime(gap, speed, truckSpeed, decay) {
+          if (gap <= 0) return 0;
+          const relative = speed - truckSpeed;
+          if (!decay) return relative < 0 ? gap / -relative : Infinity;
+          const root = Math.sqrt(relative * relative + 2 * decay * gap);
+          return relative < 0 ? 2 * gap / (root - relative) : (relative + root) / decay;
+        }
+        function finishTime(distance, speed, decay) {
+          if (distance <= 0) return 0;
+          if (!decay) return speed > 0 ? distance / speed : Infinity;
+          const discriminant = speed * speed - 2 * decay * distance;
+          return discriminant >= 0 ? 2 * distance / (speed + Math.sqrt(discriminant)) : Infinity;
+        }
+        function advance(run, now) {
+          if (!active(run) || !inMotion()) return;
+          let remaining = Math.max(0, (now - run.lastWall) / 1000);
+          run.lastWall = now;
+          const truckSpeed = MODES[run.mode].truckSpeed;
+          // At most stun expiry, speed floor, and a constant-speed segment: no discarded time.
+          while (remaining > 0 && inMotion()) {
+            const stunned = run.stunLeft > 0;
+            const speed = stunned ? 0 : run.speed;
+            const decay = !stunned && speed > COURSE.baseSpeed ? COURSE.decay : 0;
+            const boundary = stunned ? run.stunLeft : decay ? (speed - COURSE.baseSpeed) / decay : Infinity;
+            const segment = Math.min(remaining, boundary);
+            const hitAt = collisionTime(run.x - COURSE.bikeWidth / 2 - run.truckFront, speed, truckSpeed, decay);
+            const winAt = finishTime(COURSE.finish - run.x - COURSE.bikeWidth / 2, speed, decay);
+            const eventAt = Math.min(hitAt, winAt);
+            const terminal = eventAt <= segment;
+            const duration = terminal ? eventAt : segment;
+            run.x += speed * duration - decay * duration * duration / 2;
+            run.truckFront += truckSpeed * duration;
+            run.elapsed += duration;
+            remaining = Math.max(0, remaining - duration);
+            if (stunned) run.stunLeft = Math.max(0, run.stunLeft - duration);
+            else run.speed = Math.max(COURSE.baseSpeed, speed - decay * duration);
+            if (terminal) { finish(run, winAt < hitAt); return; }
+            // Floating-point subtraction can leave a sub-nanosecond residue at expiry.
+            if (boundary - duration <= 1e-9) {
+              if (stunned) {
+                run.stunLeft = 0;
+                run.speed = COURSE.baseSpeed;
+                generateQuestion(run);
+                setPhase("playing", "繼續加速！");
+                if ([input, submit, document.body].includes(document.activeElement)) input.focus({ preventScroll: true });
+              } else run.speed = COURSE.baseSpeed;
+            }
+          }
+          render(run);
+        }
+        function tick(run, now) {
+          if (!active(run) || !inMotion()) return;
+          advance(run, now);
+          if (active(run) && inMotion()) run.frame = requestAnimationFrame((time) => tick(run, time));
+        }
+        function begin(run) {
+          if (!run || !active(run) || phase !== "preview") return;
+          generateQuestion(run);
+          run.lastWall = performance.now();
+          setPhase("playing", "答對就加速！");
+          input.focus({ preventScroll: true });
+          run.frame = requestAnimationFrame((time) => tick(run, time));
+          syncVisibility();
+        }
+        function shake(run) {
+          if (reducedMotion.matches) return;
+          const animation = answerRow.animate([
+            { transform: "translateX(0)" }, { transform: "translateX(-7px)" },
+            { transform: "translateX(7px)" }, { transform: "translateX(-5px)" },
+            { transform: "translateX(5px)" }, { transform: "translateX(0)" },
+          ], { duration: 420 });
+          run.animations.add(animation);
+          animation.onfinish = () => run.animations.delete(animation);
+        }
+        function submitAnswer(event) {
+          event.preventDefault();
+          const run = session;
+          if (!run || !active(run) || phase !== "playing" || run.composing || document.hidden || !document.hasFocus()) return;
+          const id = run.question.id;
+          const raw = input.value.trim();
+          advance(run, performance.now());
+          if (!inMotion() || phase !== "playing" || run.question.id !== id) return;
+          if (!/^\d+$/.test(raw) || !Number.isSafeInteger(Number(raw))) {
+            status.textContent = "請輸入整數答案。";
+            input.setAttribute("aria-invalid", "true");
+            input.focus({ preventScroll: true });
+            return;
+          }
+          input.value = "";
+          if (Number(raw) === run.question.answer) {
+            run.correct++;
+            run.speed = Math.min(COURSE.maxSpeed, run.speed + COURSE.boost);
+            generateQuestion(run);
+            setPhase("playing", "答對了，加速！");
+          } else {
+            run.stunLeft = COURSE.stun;
+            run.speed = COURSE.baseSpeed;
+            answerRow.classList.add("is-wrong");
+            input.setAttribute("aria-invalid", "true");
+            setPhase("stunned");
+            shake(run);
+          }
+          input.focus({ preventScroll: true });
+        }
+        function syncVisibility() {
+          const run = session;
+          if (!run || !active(run)) return;
+          const unavailable = document.hidden || !document.hasFocus();
+          if (unavailable && inMotion()) {
+            advance(run, performance.now());
+            if (!inMotion()) return;
+            run.resumePhase = phase;
+            cancelAnimationFrame(run.frame);
+            run.frame = null;
+            setPhase("paused", "已暫停，回到畫面後繼續。");
+          } else if (!unavailable && phase === "paused") {
+            run.lastWall = performance.now();
+            setPhase(run.resumePhase, "繼續加速！");
+            input.focus({ preventScroll: true });
+            run.frame = requestAnimationFrame((time) => tick(run, time));
+          }
+        }
+        opener.addEventListener("click", openChase);
+        modeButtons.forEach((button) => button.addEventListener("click", () => chooseMode(button.dataset.chaseMode)));
+        start.addEventListener("click", () => {
+          if (!session || !active(session)) return;
+          if (phase === "error") {
+            bike.querySelector("img").src = "games/collectcoin/right.png";
+            void loadRider(session);
+          } else begin(session);
+        });
+        rewardButton.addEventListener("click", () => claimReward(session));
+        $("chaseForm").addEventListener("submit", submitAnswer);
+        input.addEventListener("compositionstart", () => { if (session) session.composing = true; });
+        input.addEventListener("compositionend", () => { if (session) session.composing = false; });
+        input.addEventListener("input", () => { if (phase === "playing") input.removeAttribute("aria-invalid"); });
+        $("chaseClose").addEventListener("click", closeChase);
+        dialog.addEventListener("cancel", (event) => { event.preventDefault(); closeChase(); });
+        dialog.addEventListener("close", () => { if (!dialog.open && session) closeChase(); });
+        document.addEventListener("keydown", (event) => {
+          if (!dialog.open || !session) return;
+          if (event.key === "Escape") {
+            if (event.isComposing || session.composing) return;
+            event.preventDefault(); event.stopImmediatePropagation(); closeChase();
+          } else if (event.key === "Tab") {
+            const controls = [...dialog.querySelectorAll("button:not(:disabled), input:not(:disabled)")].filter((control) => control.getClientRects().length > 0);
+            const index = controls.indexOf(document.activeElement);
+            const next = index < 0 ? (event.shiftKey ? controls.length - 1 : 0) : (index + (event.shiftKey ? -1 : 1) + controls.length) % controls.length;
+            event.preventDefault(); event.stopImmediatePropagation(); controls[next]?.focus({ preventScroll: true });
+          } else if (event.key === "Enter" && (event.repeat || event.isComposing || session.composing || event.keyCode === 229)) {
+            event.preventDefault();
+          }
+        }, true);
+        window.addEventListener("blur", syncVisibility);
+        window.addEventListener("focus", syncVisibility);
+        document.addEventListener("visibilitychange", syncVisibility);
       })();
 
       makeTiles();
