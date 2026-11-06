@@ -474,6 +474,17 @@
     .collect-item-count { text-align: right; font-weight: 900; }
     .collect-score-total { display: flex; justify-content: space-between; gap: 10px; margin: 5px 0 0; padding-top: 5px; border-top: 1px solid var(--memory-border); font-weight: 800; }
     .collect-score-total strong { font-size: 1.15em; }
+    .collect-dialog[data-mode="hard"] .collect-scoreboard { padding: 5px 7px; font-size: clamp(9px, 2.6vw, 11px); }
+    .collect-dialog[data-mode="hard"] .collect-inventory { gap: 1px; }
+    .collect-dialog[data-mode="hard"] .collect-inventory li { grid-template-columns: 17px auto 1ch minmax(2ch, auto); gap: 3px; }
+    .collect-dialog[data-mode="hard"] .collect-inventory svg { width: 17px; height: 17px; }
+    .collect-powers { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: -2px 0 8px; color: var(--memory-deep); font-size: 11px; }
+    .collect-powers span { display: inline-flex; align-items: center; gap: 4px; }
+    .collect-powers svg { width: 20px; height: 20px; }
+    .collect-shield { position: absolute; z-index: 4; top: 65%; left: 50%; width: 25%; height: 31%; border: 2px solid rgba(130,205,255,.8); border-radius: 50%; background: radial-gradient(ellipse at 30% 25%, rgba(255,255,255,.55), rgba(173,225,255,.08) 35%, rgba(150,210,255,.22) 75%); box-shadow: inset 0 0 8px rgba(255,255,255,.8), 0 0 9px rgba(123,198,255,.45); transform: translateX(-50%); pointer-events: none; }
+    .collect-rider.is-boosted { filter: drop-shadow(0 0 5px #ffde45) drop-shadow(0 0 9px #ffba26); animation: collect-speed-glow .4s ease-in-out infinite alternate; }
+    @keyframes collect-speed-glow { to { filter: drop-shadow(0 0 9px #fff17a) drop-shadow(0 0 15px #ffbe28) brightness(1.2); } }
+    @media (prefers-reduced-motion: reduce) { .collect-rider.is-boosted { animation: none; } }
 
     @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
     @keyframes pop-in { from { transform: translateY(12px) scale(.96); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
@@ -729,8 +740,8 @@
       <button class="memory-close" id="collectClose" type="button" aria-label="關閉收集金幣">×</button>
     </header>
     <section class="memory-difficulty" id="collectDifficulty" aria-label="選擇難度">
-      <button class="memory-difficulty-button" id="collectEasy" type="button"><img class="memory-difficulty-art" src="./games/collectcoin/reest.png" alt="" draggable="false"><span>簡單</span></button>
-      <button class="memory-difficulty-button" type="button" data-collect-mode="hard" disabled><img class="memory-difficulty-art" src="./games/collectcoin/right.png" alt="" draggable="false"><span>困難</span><span class="collect-mode-note">開發中</span></button>
+      <button class="memory-difficulty-button" id="collectEasy" type="button" data-collect-mode="easy"><img class="memory-difficulty-art" src="./games/collectcoin/reest.png" alt="" draggable="false"><span>簡單</span></button>
+      <button class="memory-difficulty-button" id="collectHard" type="button" data-collect-mode="hard"><img class="memory-difficulty-art" src="./games/collectcoin/right.png" alt="" draggable="false"><span>困難</span></button>
     </section>
     <section id="collectGamePanel" aria-label="簡單模式" hidden>
       <div class="collect-toolbar">
@@ -739,10 +750,14 @@
         <p class="collect-status" id="collectStatus" role="status">正在準備角色…</p>
         <div class="memory-timer collect-timer" role="timer" aria-label="遊戲剩餘時間">剩下 <strong id="collectSeconds">30</strong> 秒</div>
       </div>
+      <div class="collect-powers" id="collectPowers" aria-label="道具效果" hidden>
+        <span id="collectSpeedState"></span><span id="collectShieldState"></span>
+      </div>
       <div class="collect-stage" id="collectStage" role="region" aria-label="左右方向鍵移動機車，接住掉落的寶物">
         <div class="collect-road" aria-hidden="true"></div>
         <div id="collectDrops" aria-hidden="true"></div>
         <img class="collect-rider" id="collectRider" src="./games/collectcoin/reest.png" alt="騎機車的酷洛米" draggable="false">
+        <div class="collect-shield" id="collectShield" aria-hidden="true" hidden></div>
         <div class="collect-overlay" id="collectOverlay" hidden><strong>時間到！</strong></div>
         <aside class="collect-scoreboard" aria-label="寶物計分與收集數量">
           <ul class="collect-inventory" id="collectInventory" aria-label="各種寶物收集數量"></ul>
@@ -1934,11 +1949,15 @@
         const rewardPanel = $("collectRewardPanel");
         const rewardStage = $("collectRewardStage");
         const rewardMessage = $("collectRewardMessage");
+        const modeButtons = [...difficulty.querySelectorAll("[data-collect-mode]")];
+        const powers = $("collectPowers");
+        const speedState = $("collectSpeedState");
+        const shieldState = $("collectShieldState");
+        const shield = $("collectShield");
         const WIDTH = 600;
         const HEIGHT = 480;
         const RIDER_WIDTH = 120;
         const CATCH_Y = 390;
-        const DURATION = 30000;
         const art = (content) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true">${content}</svg>`;
         const coinArt = (fill, edge) => art(`<circle cx="32" cy="32" r="27" fill="${edge}"/><circle cx="30" cy="29" r="23" fill="${fill}" stroke="${edge}" stroke-width="2"/><circle cx="30" cy="29" r="17" fill="none" stroke="${edge}" stroke-width="2"/><path d="m30 16 4 8 9 1-7 6 2 9-8-5-8 5 2-9-7-6 9-1z" fill="${edge}"/><path d="m16 13 5-3" stroke="#fff" stroke-width="4" stroke-linecap="round"/>`);
         const ITEMS = [
@@ -1951,13 +1970,23 @@
         let session = null;
         let previousOverflow = "";
         let phase = "closed";
+        const HARD_EXTRAS = [
+          { key: "bomb", name: "炸彈", quota: 5, points: -5, size: 38, svg: art('<path d="M36 19c-2-9 6-14 13-10" fill="none" stroke="#79604b" stroke-width="4"/><path d="m49 4 2 5 6 1-5 3 1 6-5-4-5 3 2-6-4-3 6-1z" fill="#ffcf51"/><path d="m26 17 12 2-2 9-12-2z" fill="#79768a"/><circle cx="29" cy="40" r="21" fill="#383247" stroke="#201c2d" stroke-width="3"/><path d="M15 32q3-8 11-8" fill="none" stroke="#aaa5ba" stroke-width="4" stroke-linecap="round"/>') },
+          { key: "poop", name: "大便", quota: 10, points: -3, size: 34, svg: art('<path d="M31 5c10 12-8 12 9 20 13 2 14 11 8 15 15 4 13 18 0 18H16C2 58 1 44 14 40c-5-8 0-15 11-17 9-3 1-8 6-18z" fill="#a46d49" stroke="#68452f" stroke-width="3"/><circle cx="25" cy="39" r="3" fill="#fff"/><circle cx="40" cy="39" r="3" fill="#fff"/><circle cx="25" cy="40" r="1.5" fill="#302329"/><circle cx="40" cy="40" r="1.5" fill="#302329"/><path d="M26 47q7 6 13-1" fill="none" stroke="#50342a" stroke-width="2.5" stroke-linecap="round"/>') },
+          { key: "speed", name: "神速力", quota: 2, points: 0, size: 40, svg: art('<path d="m22 8 16 2-1 19 13 6c7 2 10 8 8 17H9V38l13-6z" fill="#fff1a1" stroke="#b78628" stroke-width="3"/><path d="M10 48h48M27 30l8 5m-10 1 8 5" stroke="#b78628" stroke-width="3"/><path d="m8 12 9 1-6 9h7L6 36l4-12H3z" fill="#ffc52f"/>') },
+          { key: "shield", name: "防護罩", quota: 1, points: 0, size: 42, svg: art('<circle cx="32" cy="32" r="27" fill="#d7f3ff" fill-opacity=".55" stroke="#67bdec" stroke-width="3"/><path d="M13 26q3-13 16-14" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/><path d="m32 20 12 5v10c0 7-12 13-12 13S20 42 20 35V25z" fill="#a2daff" stroke="#6aabd4" stroke-width="2"/>') },
+        ];
+        const MODES = {
+          easy: { name: "簡單", types: ITEMS, steadyCount: 40, duration: 30000 },
+          hard: { name: "困難", types: [...ITEMS.map((item) => item.key === "chest" ? { ...item, quota: 5 } : item), ...HARD_EXTRAS], steadyCount: 40, duration: 40000 },
+        };
         let collectMusicBuffer = null;
         let pendingMapMusicRestore = false;
 
         function active(run) { return session === run && dialog.open && !run.closed; }
         function canPlayAudio(run) {
           return active(run) && phase === "playing" && !document.hidden &&
-            performance.now() - run.startedAt < DURATION && diceAudioContext?.state === "running";
+            performance.now() - run.startedAt < run.duration && diceAudioContext?.state === "running";
         }
         function createCollectMusicBuffer(context) {
           const step = .2; // 150 BPM, two notes per beat.
@@ -1997,7 +2026,8 @@
             const gain = context.createGain();
             run.music = { source, gain };
             const elapsed = (performance.now() - run.startedAt) / 1000;
-            run.musicFast = elapsed >= 25;
+            const rushStart = (run.duration - 5000) / 1000;
+            run.musicFast = elapsed >= rushStart;
             source.buffer = collectMusicBuffer;
             source.loop = true;
             source.playbackRate.setValueAtTime(run.musicFast ? 1.15 : 1, context.currentTime);
@@ -2005,7 +2035,7 @@
             gain.gain.linearRampToValueAtTime(.22, context.currentTime + .08);
             source.connect(gain);
             gain.connect(context.destination);
-            source.start(0, (Math.min(elapsed, 25) + Math.max(0, elapsed - 25) * 1.15) % collectMusicBuffer.duration);
+            source.start(0, (Math.min(elapsed, rushStart) + Math.max(0, elapsed - rushStart) * 1.15) % collectMusicBuffer.duration);
           } catch {
             stopCollectAudio(run);
           }
@@ -2023,18 +2053,19 @@
             // Audio is optional: movement, collection and the deadline still work.
           }
         }
-        function playPickupSound(run, type) {
+        function playPickupSound(run, type, blocked = false) {
           if (!canPlayAudio(run)) return;
           try {
             const context = diceAudioContext;
             const oscillator = context.createOscillator();
             const gain = context.createGain();
             const time = context.currentTime;
-            const rich = type.key === "bag" || type.key === "chest";
-            const duration = rich ? .24 : .16;
-            oscillator.type = "sine";
-            oscillator.frequency.setValueAtTime(988, time);
-            oscillator.frequency.setValueAtTime(1480, time + .055);
+            const negative = type.points < 0 && !blocked;
+            const rich = type.key === "bag" || type.key === "chest" || type.points === 0 || blocked;
+            const duration = negative ? .22 : rich ? .24 : .16;
+            oscillator.type = negative ? "triangle" : "sine";
+            oscillator.frequency.setValueAtTime(negative ? 220 : blocked ? 1320 : 988, time);
+            oscillator.frequency.setValueAtTime(negative ? 110 : blocked ? 1760 : 1480, time + .055);
             if (rich) oscillator.frequency.setValueAtTime(1976, time + .115);
             gain.gain.setValueAtTime(.0001, time);
             gain.gain.exponentialRampToValueAtTime(.13, time + .006);
@@ -2082,7 +2113,7 @@
           dialog.dataset.phase = next;
           status.textContent = message;
           difficulty.hidden = next !== "difficulty";
-          $("collectEasy").disabled = next !== "difficulty";
+          modeButtons.forEach((button) => { button.disabled = next !== "difficulty"; });
           panel.hidden = next === "difficulty" || next === "closed";
           start.hidden = !["difficulty", "loading", "preview", "error"].includes(next);
           start.disabled = !["preview", "error"].includes(next);
@@ -2091,33 +2122,79 @@
           const showingReward = next === "rewarding" || next === "rewarded";
           stage.hidden = showingReward;
           rewardPanel.hidden = !showingReward;
+          powers.hidden = session?.mode !== "hard" || showingReward || next === "closed";
         }
         function pose(name) {
           if (rider.dataset.pose === name) return;
           rider.dataset.pose = name;
           rider.src = `./games/collectcoin/${name === "rest" ? "reest" : name}.png`;
         }
-        function clearKeys(run) { if (run) run.keys.clear(); pose("rest"); }
+        function clearKeys(run) { if (run) run.keys.clear(); }
+        function updateRiderPose(run) {
+          const moving = direction(run);
+          if (moving) run.lastPose = moving < 0 ? "left" : "right";
+          pose(run.lastPose);
+        }
         function direction(run) {
           if (run.keys.size === 0) return 0;
           return [...run.keys].at(-1) === "ArrowLeft" ? -1 : 1;
         }
+        function scoringTypes(run) { return MODES[run.mode || "easy"].types.filter((type) => type.points !== 0); }
         function scoreFor(run) {
-          return ITEMS.reduce((sum, item) => sum + run.counts[item.key] * item.points, 0);
+          return scoringTypes(run).reduce((sum, item) => sum + run.counts[item.key] * item.points, 0);
         }
         function updateCounts(run) {
-          ITEMS.forEach((item) => {
+          const types = scoringTypes(run);
+          types.forEach((item) => {
             const count = run.counts[item.key];
             const counter = inventory.querySelector(`[data-count="${item.key}"]`);
             counter.textContent = String(count);
-            counter.closest("li").setAttribute("aria-label", `${item.name}，每個${item.points}分：已收集${count}個`);
+            counter.closest("li").setAttribute("aria-label", `${item.name}，每個${item.points}分：${item.points < 0 ? "有效命中" : "已收集"}${count}個`);
           });
           $("collectScore").textContent = String(scoreFor(run));
-          inventory.setAttribute("aria-label", `收集結果：${ITEMS.map((item) => `${item.name}${run.counts[item.key]}個`).join("，")}`);
+          inventory.setAttribute("aria-label", `收集與扣分：${types.map((item) => `${item.name}${run.counts[item.key]}個`).join("，")}`);
         }
         function buildInventory(run) {
-          inventory.innerHTML = [...ITEMS].reverse().map((item) => `<li>${item.svg}<span aria-hidden="true">(x${item.points})</span><span aria-hidden="true">:</span><span class="collect-item-count" data-count="${item.key}">0</span></li>`).join("");
+          const types = [...ITEMS].reverse();
+          if (run.mode === "hard") types.push(...HARD_EXTRAS.filter((type) => type.points < 0));
+          inventory.innerHTML = types.map((item) => `<li>${item.svg}<span aria-hidden="true">(x${item.points})</span><span aria-hidden="true">:</span><span class="collect-item-count" data-count="${item.key}">0</span></li>`).join("");
           updateCounts(run);
+        }
+        function updatePowers(run, elapsed) {
+          const boosted = run.boostUntil > elapsed;
+          rider.classList.toggle("is-boosted", boosted);
+          shield.hidden = !run.shield;
+          shield.style.left = rider.style.left;
+          if (run.mode !== "hard") return;
+          const speedLabel = boosted ? `神速力 ${Math.ceil((run.boostUntil - elapsed) / 1000)}秒` : run.speedCollected ? "神速力已結束" : "神速力：1.5倍／5秒";
+          const shieldLabel = run.shield ? "防護罩：保護中" : run.shieldCollected ? "防護罩已消耗" : "防護罩：擋一次";
+          // Keep labels stable between second boundaries; icons are installed on mode choice.
+          speedState.querySelector("span").textContent = speedLabel;
+          shieldState.querySelector("span").textContent = shieldLabel;
+        }
+        function clearPowers(run) {
+          run.boostUntil = 0;
+          run.shield = false;
+          updatePowers(run, 0);
+        }
+        function collectItem(run, item, elapsed) {
+          const type = item.type;
+          let blocked = false;
+          if (type.points < 0 && run.shield) {
+            run.shield = false;
+            blocked = true;
+          } else if (type.key === "speed") {
+            run.boostUntil = elapsed + 5000;
+            run.speedCollected = true;
+          } else if (type.key === "shield") {
+            run.shield = true;
+            run.shieldCollected = true;
+          } else {
+            run.counts[type.key]++;
+          }
+          updateCounts(run);
+          updatePowers(run, elapsed);
+          playPickupSound(run, type, blocked);
         }
         function dispose() {
           if (!session) return;
@@ -2130,6 +2207,7 @@
           run.animations.clear();
           stopCollectAudio(run);
           clearKeys(run);
+          clearPowers(run);
           run.items.forEach((item) => item.element?.remove());
           session = null;
           if (phase === "playing") phase = "closed";
@@ -2145,7 +2223,7 @@
         function openCollect() {
           if (dialog.open || $("memoryDialog").open || state.busy || !modal.hidden) return;
           dispose();
-          session = { closed: false, keys: new Set(), items: [], tones: new Set(), animations: new Set(), rewardClaimed: false, rewardTimer: null, finalScore: null, music: null, musicFast: false, restoreMapMusic: false, counts: Object.fromEntries(ITEMS.map((item) => [item.key, 0])), x: WIDTH / 2, frame: null, endTimer: null };
+          session = { closed: false, mode: null, duration: MODES.easy.duration, lastPose: "rest", boostUntil: 0, shield: false, speedCollected: false, shieldCollected: false, keys: new Set(), items: [], tones: new Set(), animations: new Set(), rewardClaimed: false, rewardTimer: null, finalScore: null, music: null, musicFast: false, restoreMapMusic: false, counts: Object.fromEntries([...ITEMS, ...HARD_EXTRAS].map((item) => [item.key, 0])), x: WIDTH / 2, frame: null, endTimer: null };
           previousOverflow = document.body.style.overflow;
           document.body.style.overflow = "hidden";
           drops.replaceChildren();
@@ -2155,6 +2233,8 @@
           seconds.textContent = "30";
           seconds.parentElement.classList.remove("is-urgent");
           rider.style.left = "50%";
+          delete dialog.dataset.mode;
+          clearPowers(session);
           pose("rest");
           start.textContent = "開始";
           buildInventory(session);
@@ -2162,6 +2242,20 @@
           dialog.showModal();
           $("collectEasy").focus({ preventScroll: true });
           dialog.scrollTop = 0;
+        }
+        function chooseCollectMode(mode) {
+          const run = session;
+          if (!run || !active(run) || phase !== "difficulty" || run.mode || !MODES[mode]) return;
+          run.mode = mode;
+          run.duration = MODES[mode].duration;
+          seconds.textContent = String(run.duration / 1000);
+          dialog.dataset.mode = mode;
+          panel.setAttribute("aria-label", `${MODES[mode].name}模式`);
+          speedState.innerHTML = `${HARD_EXTRAS.find((type) => type.key === "speed").svg}<span></span>`;
+          shieldState.innerHTML = `${HARD_EXTRAS.find((type) => type.key === "shield").svg}<span></span>`;
+          buildInventory(run);
+          updatePowers(run, 0);
+          void loadRider(run);
         }
         async function loadRider(run) {
           setPhase("loading", "正在準備角色…");
@@ -2173,7 +2267,7 @@
             }));
             if (!active(run)) return;
             start.textContent = "開始";
-            setPhase("preview", "按住 ← / → 移動，接住掉落的寶物！");
+            setPhase("preview", run.mode === "hard" ? "← / → 移動，接寶物、閃炸彈與大便！" : "按住 ← / → 移動，接住掉落的寶物！");
             start.focus({ preventScroll: true });
           } catch {
             if (!active(run)) return;
@@ -2181,43 +2275,88 @@
             setPhase("error", "角色載入失敗，請重新載入。");
           }
         }
-        function makeSchedule() {
-          const types = ITEMS.flatMap((item) => Array(item.quota).fill(item));
-          for (let i = types.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [types[i], types[j]] = [types[j], types[i]];
-          }
-          const steadyCount = 40;
-          const rushCount = types.length - steadyCount;
-          return types.map((type, index) => {
-            const rush = index >= steadyCount;
-            const spawn = rush ? 25000 + (index - steadyCount) * (3500 / (rushCount - 1))
-              : 500 + index * (24000 / (steadyCount - 1));
-            // Keep the full catch window before 29.7s, even for the final treasure.
-            const latestTravel = (DURATION - 300 - spawn) * (HEIGHT + type.size) / (CATCH_Y + 14 + type.size);
-            const travel = rush ? Math.min(2400 + Math.random() * 500, latestTravel) : 3200 + Math.random() * 500;
-            return {
+        function makeSchedule(run) {
+          const mode = MODES[run.mode];
+          const shuffle = (types) => {
+            for (let i = types.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [types[i], types[j]] = [types[j], types[i]];
+            }
+            return types;
+          };
+          const schedule = [];
+          const add = (type, spawn, rush = false) => {
+            // Every item retains a complete catch window before the deadline.
+            const latestTravel = (run.duration - 300 - spawn) * (HEIGHT + type.size) / (CATCH_Y + 14 + type.size);
+            const travel = Math.min((rush ? 2400 : 3200) + Math.random() * 500, latestTravel);
+            schedule.push({
               type, spawn, x: type.size / 2 + Math.random() * (WIDTH - type.size), travel,
               spawned: false, resolved: false, element: null,
-            };
+            });
+          };
+          const chest = mode.types.find((type) => type.key === "chest");
+          // Place one chest in the middle of each equal portion of the round.
+          for (let index = 0; index < chest.quota; index++) {
+            add(chest, (index + .5) * run.duration / chest.quota);
+          }
+          const treasures = shuffle(mode.types.filter((type) => type.points > 0 && type.key !== "chest")
+            .flatMap((type) => Array(type.quota).fill(type)));
+          const steadyCount = mode.steadyCount - chest.quota;
+          const rushCount = treasures.length - steadyCount;
+          const rushStart = run.duration - 5000;
+          treasures.forEach((type, index) => {
+            const rush = index >= steadyCount;
+            const spawn = rush ? rushStart + (index - steadyCount) * (3500 / (rushCount - 1))
+              : 500 + index * ((rushStart - 1000) / (steadyCount - 1));
+            add(type, spawn, rush);
           });
+          // Hazards keep one evenly spaced schedule, with no final-five-second burst.
+          const hazards = shuffle(mode.types.filter((type) => type.points < 0)
+            .flatMap((type) => Array(type.quota).fill(type)));
+          hazards.forEach((type, index) => {
+            add(type, 1000 + index * ((run.duration - 5000) / Math.max(1, hazards.length - 1)));
+          });
+          const speed = mode.types.find((type) => type.key === "speed");
+          if (speed) {
+            for (let index = 0; index < speed.quota; index++) {
+              // Separate shoe drops into early and mid/late slots (6s and 24s in hard mode).
+              add(speed, run.duration * (.15 + index * .45 / Math.max(1, speed.quota - 1)));
+            }
+          }
+          const shieldType = mode.types.find((type) => type.key === "shield");
+          if (shieldType) add(shieldType, run.duration * (.2 + Math.random() * .25));
+          return schedule.sort((a, b) => a.spawn - b.spawn);
         }
-        function coinsForScore(score) {
-          return score >= 130 ? 6 : score >= 120 ? 5 : score >= 110 ? 4 : score >= 100 ? 3 : score >= 90 ? 2 : 1;
+        function collectRewardForScore(score, mode) {
+          if (mode === "hard") {
+            if (score >= 140) return { coins: 0, pokeChances: 1 };
+            return { coins: score >= 130 ? 8 : score >= 125 ? 7 : score >= 120 ? 6 : score >= 115 ? 5 : score >= 110 ? 4 : score >= 105 ? 3 : score >= 100 ? 2 : 1, pokeChances: 0 };
+          }
+          return { coins: score >= 130 ? 6 : score >= 120 ? 5 : score >= 110 ? 4 : score >= 100 ? 3 : score >= 90 ? 2 : 1, pokeChances: 0 };
         }
         function claimCollectReward(run) {
           if (!run || !active(run) || phase !== "finished" || run.rewardClaimed || run.finalScore === null) return;
           // Grant before animating; closing or repeated clicks cannot revoke or duplicate it.
           run.rewardClaimed = true;
-          const coins = coinsForScore(run.finalScore);
-          state.coins += coins;
+          const reward = collectRewardForScore(run.finalScore, run.mode);
+          state.coins += reward.coins;
+          state.pokeChances += reward.pokeChances;
           updateToken();
           rewardStage.replaceChildren();
-          rewardMessage.textContent = `獲得 ${coins} 枚森林金幣！`;
-          setPhase("rewarding", `${run.finalScore} 分，領取你的${run.finalScore < 90 ? "參加獎" : "獎勵"}！`);
+          rewardMessage.textContent = reward.pokeChances ? "戳戳樂 +1 次" : `獲得 ${reward.coins} 枚森林金幣！`;
+          const participationThreshold = run.mode === "hard" ? 100 : 90;
+          setPhase("rewarding", `${run.finalScore} 分，領取你的${run.finalScore < participationThreshold ? "參加獎" : "獎勵"}！`);
           $("collectClose").focus({ preventScroll: true });
           dialog.scrollTop = 0;
-          const duration = animateRewardCoins(rewardStage, coins, run.animations);
+          if (reward.pokeChances) {
+            const gift = document.createElement("div");
+            gift.className = "memory-reward-gift";
+            gift.innerHTML = '<span class="memory-reward-gift-icon">🎁</span><span class="memory-reward-gift-label">戳戳樂機會</span>';
+            rewardStage.appendChild(gift);
+            setPhase("rewarded", `${run.finalScore} 分！已獲得戳戳樂 +1 次。`);
+            return;
+          }
+          const duration = animateRewardCoins(rewardStage, reward.coins, run.animations);
           run.rewardTimer = window.setTimeout(() => {
             if (!active(run) || phase !== "rewarding") return;
             run.animations.forEach((animation) => animation.cancel());
@@ -2230,10 +2369,12 @@
           cancelAnimationFrame(run.frame);
           clearTimeout(run.endTimer);
           clearKeys(run);
+          pose("rest");
           run.items.forEach((item) => item.element?.remove());
           seconds.textContent = "0";
           overlay.hidden = false;
-          const total = Object.values(run.counts).reduce((sum, count) => sum + count, 0);
+          clearPowers(run);
+          const total = ITEMS.reduce((sum, type) => sum + run.counts[type.key], 0);
           run.finalScore = scoreFor(run);
           setPhase("finished", `收集完成！共接到 ${total} 個寶物，總分 ${run.finalScore} 分。`);
           stopCollectAudio(run);
@@ -2243,22 +2384,26 @@
         function tick(run, now) {
           if (!active(run) || phase !== "playing") return;
           const elapsed = now - run.startedAt;
-          if (elapsed >= DURATION) { finish(run); return; }
+          if (elapsed >= run.duration) { finish(run); return; }
           const gap = now - run.lastFrame;
-          const dt = Math.min(gap, 50) / 1000;
+          const interval = Math.min(gap, 50);
+          const boostedTime = Math.max(0, Math.min(interval, run.boostUntil - (elapsed - interval)));
+          const distance = (interval - boostedTime) * .32 + boostedTime * .48;
           run.lastFrame = now;
           const moving = direction(run);
-          run.x = Math.max(RIDER_WIDTH / 2, Math.min(WIDTH - RIDER_WIDTH / 2, run.x + moving * 320 * dt));
+          run.x = Math.max(RIDER_WIDTH / 2, Math.min(WIDTH - RIDER_WIDTH / 2, run.x + moving * distance));
           rider.style.left = `${run.x / WIDTH * 100}%`;
-          pose(moving < 0 ? "left" : moving > 0 ? "right" : "rest");
-          const remaining = Math.ceil((DURATION - elapsed) / 1000);
+          updateRiderPose(run);
+          updatePowers(run, elapsed);
+          const remaining = Math.ceil((run.duration - elapsed) / 1000);
           seconds.textContent = String(remaining);
           seconds.parentElement.classList.toggle("is-urgent", remaining <= 5);
-          if (elapsed >= 25000 && run.music && !run.musicFast) {
+          if (elapsed >= run.duration - 5000 && run.music && !run.musicFast) {
             run.musicFast = true;
             run.music.source.playbackRate.setValueAtTime(1.15, diceAudioContext.currentTime);
           }
-          for (const item of run.items) {
+          const contacts = [];
+          for (const [index, item] of run.items.entries()) {
             if (item.resolved || elapsed < item.spawn) continue;
             if (!item.spawned) {
               item.spawned = true;
@@ -2281,9 +2426,8 @@
             if (canCatch) {
               item.resolved = true;
               item.element.remove();
-              run.counts[item.type.key]++;
-              updateCounts(run);
-              playPickupSound(run, item.type);
+              const entry = item.spawn + item.travel * (CATCH_Y - 14) / (HEIGHT + item.type.size);
+              contacts.push({ item, index, time: Math.max(run.previousElapsed, entry) });
             } else if (y - radius > HEIGHT) {
               item.resolved = true;
               item.element.remove();
@@ -2291,20 +2435,22 @@
               item.element.style.top = `${y / HEIGHT * 100}%`;
             }
           }
+          contacts.sort((a, b) => a.time - b.time || a.index - b.index);
+          contacts.forEach(({ item }) => collectItem(run, item, elapsed));
           run.previousElapsed = elapsed;
           run.frame = requestAnimationFrame((time) => tick(run, time));
         }
         function begin(run) {
           if (!active(run) || phase !== "preview") return;
-          run.items = makeSchedule();
+          run.items = makeSchedule(run);
           run.startedAt = performance.now();
           run.lastFrame = run.startedAt;
           run.previousElapsed = 0;
           overlay.hidden = true;
           clearKeys(run);
-          setPhase("playing", "按住 ← / → 移動，接住掉落的寶物！");
+          setPhase("playing", run.mode === "hard" ? "← / → 移動，接寶物、閃炸彈與大便！" : "按住 ← / → 移動，接住掉落的寶物！");
           $("collectClose").focus({ preventScroll: true });
-          run.endTimer = window.setTimeout(() => finish(run), DURATION);
+          run.endTimer = window.setTimeout(() => finish(run), run.duration);
           run.frame = requestAnimationFrame((time) => tick(run, time));
           run.restoreMapMusic = Boolean(backgroundMusicSource) || pendingMapMusicRestore;
           pendingMapMusicRestore = false;
@@ -2312,7 +2458,7 @@
           prepareCollectAudio(run);
         }
         opener.addEventListener("click", openCollect);
-        $("collectEasy").addEventListener("click", () => { if (phase === "difficulty") void loadRider(session); });
+        modeButtons.forEach((button) => button.addEventListener("click", () => chooseCollectMode(button.dataset.collectMode)));
         start.addEventListener("click", () => { if (phase === "error") void loadRider(session); else if (phase === "preview") begin(session); });
         rewardButton.addEventListener("click", () => claimCollectReward(session));
         $("collectClose").addEventListener("click", closeCollect);
@@ -2326,7 +2472,7 @@
             if (phase === "playing" && !event.repeat) {
               session.keys.delete(event.key);
               session.keys.add(event.key);
-              pose(direction(session) < 0 ? "left" : "right");
+              updateRiderPose(session);
             }
           } else if (event.key === "Escape") {
             event.preventDefault(); event.stopImmediatePropagation(); closeCollect();
@@ -2341,16 +2487,16 @@
           if (!dialog.open || !["ArrowLeft", "ArrowRight"].includes(event.key)) return;
           event.preventDefault();
           session.keys.delete(event.key);
-          const moving = direction(session);
-          pose(moving < 0 ? "left" : moving > 0 ? "right" : "rest");
+          if (phase === "playing") updateRiderPose(session);
         });
         window.addEventListener("blur", () => { if (session) clearKeys(session); });
         document.addEventListener("visibilitychange", () => {
           if (session) {
             clearKeys(session);
+            if (phase === "playing") updatePowers(session, performance.now() - session.startedAt);
             if (document.hidden) stopCollectAudio(session);
             else if (phase === "playing") {
-              if (performance.now() - session.startedAt >= DURATION) finish(session);
+              if (performance.now() - session.startedAt >= session.duration) finish(session);
               else prepareCollectAudio(session);
             }
           }
