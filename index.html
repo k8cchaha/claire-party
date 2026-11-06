@@ -381,7 +381,7 @@
     .memory-difficulty { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding: 30px 0 12px; }
     .memory-difficulty-button { display: grid; justify-items: center; align-content: center; gap: 12px; min-width: 0; min-height: 190px; padding: 20px 12px; border: 2px solid var(--memory-border); border-radius: 20px; color: var(--memory-deep); background: var(--memory-soft); font-family: var(--serif); font-size: clamp(26px, 6vw, 36px); font-weight: 900; box-shadow: 0 5px 0 var(--memory-border); cursor: pointer; }
     .memory-difficulty-art { display: block; width: clamp(72px, 20vw, 100px); height: clamp(72px, 20vw, 100px); padding: 5px; border-radius: 50%; background: #fff7fb; object-fit: contain; pointer-events: none; }
-    .memory-difficulty-button:is([data-memory-mode="hard"], [data-collect-mode="hard"]) { color: #fff; background: var(--memory-purple); border-color: var(--memory-purple); box-shadow: 0 5px 0 var(--memory-deep); }
+    .memory-difficulty-button:is([data-memory-mode="hard"], [data-collect-mode="hard"], [data-snake-mode="hard"]) { color: #fff; background: var(--memory-purple); border-color: var(--memory-purple); box-shadow: 0 5px 0 var(--memory-deep); }
     .memory-difficulty-button:not(:disabled):hover { filter: brightness(1.05); }
     .memory-difficulty-button:not(:disabled):active { transform: translateY(3px); box-shadow: none; }
     .memory-board-wrap { position: relative; }
@@ -485,6 +485,33 @@
     .collect-rider.is-boosted { filter: drop-shadow(0 0 5px #ffde45) drop-shadow(0 0 9px #ffba26); animation: collect-speed-glow .4s ease-in-out infinite alternate; }
     @keyframes collect-speed-glow { to { filter: drop-shadow(0 0 9px #fff17a) drop-shadow(0 0 15px #ffbe28) brightness(1.2); } }
     @media (prefers-reduced-motion: reduce) { .collect-rider.is-boosted { animation: none; } }
+
+    .snake-dialog { width: min(590px, calc(100% - 32px)); }
+    .snake-dialog .memory-header { align-items: center; }
+    .snake-dialog .memory-difficulty-button:disabled { opacity: .5; cursor: not-allowed; }
+    .snake-difficulty-art { display: grid; place-items: center; width: clamp(72px, 20vw, 100px); height: clamp(72px, 20vw, 100px); border-radius: 50%; background: #fff7fb; font-size: 54px; }
+    .snake-mode-note { font-family: var(--sans); font-size: 12px; }
+    .snake-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+    .snake-toolbar .memory-action { min-width: 64px; padding: 7px 12px; }
+    .snake-status { flex: 1 1 110px; margin: 0; color: #73647f; font-size: 12px; line-height: 1.4; }
+    .snake-toolbar .memory-timer { margin-left: auto; }
+    .snake-progress { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; margin: 0 0 8px; color: var(--memory-deep); font-size: 12px; font-variant-numeric: tabular-nums; }
+    .snake-board { display: grid; grid-template-columns: repeat(16, minmax(0, 1fr)); grid-template-rows: repeat(16, minmax(0, 1fr)); aspect-ratio: 1; overflow: hidden; border: 3px solid var(--memory-purple); border-radius: 12px; background: #f6f1fc; }
+    .snake-cell { position: relative; display: grid; place-items: center; min-width: 0; min-height: 0; box-shadow: inset -1px -1px rgba(119,82,163,.08); font-size: clamp(11px, 3.1vw, 25px); line-height: 1; }
+    .snake-cell:nth-child(2n) { background: rgba(217,199,235,.15); }
+    .snake-cell.is-body { z-index: 1; border: 1px solid #f6f1fc; border-radius: 30%; background: #b08ad1; }
+    .snake-cell.is-head { z-index: 2; border: 1px solid #f6f1fc; border-radius: 40%; background: var(--memory-purple); }
+    .snake-cell.is-head::after { position: absolute; top: 22%; left: 25%; width: 16%; height: 16%; border-radius: 50%; background: #fff; box-shadow: .4em 0 #fff; content: ""; }
+    .snake-cell.is-hit { background: #c64d73; }
+    .snake-cell.is-obstacle { border: 1px solid #f6f1fc; border-radius: 18%; background: #807588; box-shadow: inset 0 -3px rgba(42,31,52,.25); }
+    .snake-result { margin: 10px 0 0; padding: 12px; border: 1px solid var(--memory-border); border-radius: 12px; color: var(--memory-deep); background: var(--memory-soft); font-size: 14px; text-align: center; }
+    .snake-result strong { display: block; margin-bottom: 4px; font-family: var(--serif); font-size: 22px; }
+    @media (max-width: 420px) {
+      .snake-dialog[data-phase="preview"] .snake-toolbar { display: grid; grid-template-columns: 1fr auto; gap: 6px 8px; }
+      .snake-dialog[data-phase="preview"] .snake-toolbar .memory-action { justify-self: start; }
+      .snake-dialog[data-phase="preview"] .snake-toolbar .memory-timer { grid-column: 2; grid-row: 1; }
+      .snake-dialog[data-phase="preview"] .snake-status { grid-column: 1 / -1; grid-row: 2; }
+    }
 
     @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
     @keyframes pop-in { from { transform: translateY(12px) scale(.96); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
@@ -767,6 +794,32 @@
       <section class="memory-reward-panel" id="collectRewardPanel" aria-label="收集金幣獎勵" hidden>
         <div class="memory-reward-stage" id="collectRewardStage" aria-hidden="true"></div>
         <p class="memory-reward-message" id="collectRewardMessage" role="status"></p>
+      </section>
+    </section>
+  </dialog>
+
+  <dialog class="memory-dialog snake-dialog" id="snakeDialog" aria-labelledby="snakeTitle">
+    <header class="memory-header">
+      <h2 class="memory-title" id="snakeTitle">貪食蛇</h2>
+      <button class="memory-close" id="snakeClose" type="button" aria-label="關閉貪食蛇">×</button>
+    </header>
+    <section class="memory-difficulty" id="snakeDifficulty" aria-label="選擇難度">
+      <button class="memory-difficulty-button" id="snakeNormal" type="button" data-snake-mode="normal"><span class="snake-difficulty-art" aria-hidden="true">🐍</span><span>一般</span></button>
+      <button class="memory-difficulty-button" id="snakeHard" type="button" data-snake-mode="hard"><span class="snake-difficulty-art" aria-hidden="true">🍉</span><span>困難</span></button>
+    </section>
+    <section id="snakeGamePanel" aria-label="一般模式" hidden>
+      <div class="snake-toolbar">
+        <button class="memory-action" id="snakeStart" type="button">開始</button>
+        <button class="memory-action" id="snakeReward" type="button" disabled hidden>獲取獎勵</button>
+        <p class="snake-status" id="snakeStatus" role="status"></p>
+        <div class="memory-timer" role="timer" aria-label="遊戲剩餘時間">剩下 <strong id="snakeSeconds">60</strong> 秒</div>
+      </div>
+      <div class="snake-progress"><span id="snakeLevel">第 1 / 6 關</span><span id="snakeLives" role="img" aria-label="剩餘 2 命">🐍🐍</span><span id="snakeFruitCount">水果 2 顆</span></div>
+      <div class="snake-board" id="snakeBoard" role="img" aria-label="貪食蛇棋盤，方向鍵移動"></div>
+      <p class="snake-result" id="snakeResult" role="status" hidden></p>
+      <section class="memory-reward-panel" id="snakeRewardPanel" aria-label="貪食蛇獎勵" hidden>
+        <div class="memory-reward-stage" id="snakeRewardStage" aria-hidden="true"></div>
+        <p class="memory-reward-message" id="snakeRewardMessage" role="status"></p>
       </section>
     </section>
   </dialog>
@@ -1628,7 +1681,7 @@
         }
 
         function openMemory() {
-          if (dialog.open || $("collectDialog").open || state.busy || !modal.hidden) return;
+          if (dialog.open || $("collectDialog").open || $("snakeDialog").open || state.busy || !modal.hidden) return;
           dispose();
           session = { controller: new AbortController(), animations: new Set(), tones: new Set(), mode: null, correctCount: null, rewardClaimed: false };
           delete dialog.dataset.mode;
@@ -2221,7 +2274,7 @@
           opener.focus({ preventScroll: true });
         }
         function openCollect() {
-          if (dialog.open || $("memoryDialog").open || state.busy || !modal.hidden) return;
+          if (dialog.open || $("memoryDialog").open || $("snakeDialog").open || state.busy || !modal.hidden) return;
           dispose();
           session = { closed: false, mode: null, duration: MODES.easy.duration, lastPose: "rest", boostUntil: 0, shield: false, speedCollected: false, shieldCollected: false, keys: new Set(), items: [], tones: new Set(), animations: new Set(), rewardClaimed: false, rewardTimer: null, finalScore: null, music: null, musicFast: false, restoreMapMusic: false, counts: Object.fromEntries([...ITEMS, ...HARD_EXTRAS].map((item) => [item.key, 0])), x: WIDTH / 2, frame: null, endTimer: null };
           previousOverflow = document.body.style.overflow;
@@ -2501,6 +2554,400 @@
             }
           }
           if (!document.hidden && phase !== "playing") restoreMapMusic(session);
+        });
+      })();
+
+      // Snake owns its board, input and sound lifecycle independently of map rewards.
+      (() => {
+        const opener = document.querySelector('[data-minigame="3"]');
+        const dialog = $("snakeDialog");
+        const difficulty = $("snakeDifficulty");
+        const normal = $("snakeNormal");
+        const modeButtons = [...difficulty.querySelectorAll("[data-snake-mode]")];
+        const panel = $("snakeGamePanel");
+        const start = $("snakeStart");
+        const status = $("snakeStatus");
+        const seconds = $("snakeSeconds");
+        const board = $("snakeBoard");
+        const result = $("snakeResult");
+        const rewardButton = $("snakeReward");
+        const rewardPanel = $("snakeRewardPanel");
+        const rewardStage = $("snakeRewardStage");
+        const rewardMessage = $("snakeRewardMessage");
+        const SIZE = 16;
+        const MODES = {
+          normal: { name: "一般", duration: 60000, levels: 6, lives: 2, step: 180, fastStep: 180, fastFrom: Infinity },
+          hard: { name: "困難", duration: 120000, levels: 10, lives: 2, step: 180, fastStep: 150, fastFrom: 8 },
+        };
+        const movementStep = (run) => run.completed + 1 >= MODES[run.mode].fastFrom ? MODES[run.mode].fastStep : MODES[run.mode].step;
+        const canClaimReward = (run) => run && !run.rewardClaimed && (run.mode === "hard" || (run.mode === "normal" && run.completed > 0));
+        const FRUITS = ["🍓", "🍇", "🍌", "🍎", "🍊", "🥝", "🍍", "🍉", "🍑", "🍒"];
+        const DIRECTIONS = { ArrowUp: -SIZE, ArrowDown: SIZE, ArrowLeft: -1, ArrowRight: 1 };
+        let session = null;
+        let phase = "closed";
+        let previousOverflow = "";
+        let cells = [];
+        const active = (run) => session === run && !run.closed && dialog.open;
+        const inRound = () => phase === "playing" || phase === "reviving";
+
+        function setPhase(next, message) {
+          phase = next;
+          dialog.dataset.phase = next;
+          difficulty.hidden = next !== "difficulty";
+          modeButtons.forEach((button) => { button.disabled = next !== "difficulty"; });
+          panel.hidden = next === "difficulty" || next === "closed";
+          start.hidden = next !== "preview";
+          start.disabled = next !== "preview";
+          result.hidden = next !== "finished";
+          rewardButton.hidden = next !== "finished" || !canClaimReward(session);
+          rewardButton.disabled = rewardButton.hidden;
+          const showingReward = next === "rewarding" || next === "rewarded";
+          board.hidden = showingReward;
+          $("snakeLevel").parentElement.hidden = showingReward;
+          rewardPanel.hidden = !showingReward;
+          status.textContent = message;
+        }
+        function render(run) {
+          const occupied = new Set(run.snake);
+          cells.forEach((cell, position) => {
+            const head = position === run.snake[0];
+            cell.classList.toggle("is-head", head);
+            cell.classList.toggle("is-body", !head && occupied.has(position));
+            cell.classList.toggle("is-hit", head && run.hit);
+            cell.classList.toggle("is-obstacle", run.obstacles.has(position));
+            cell.textContent = run.obstacles.has(position) ? "🪨" : run.fruits.get(position) || "";
+          });
+          const mode = MODES[run.mode];
+          const level = Math.min(run.completed + 1, mode.levels);
+          $("snakeLevel").textContent = `第 ${level} / ${mode.levels} 關${level >= mode.fastFrom ? " · 加速" : ""}`;
+          $("snakeFruitCount").textContent = `水果 ${run.fruits.size} 顆`;
+          $("snakeLives").textContent = "🐍".repeat(run.lives);
+          $("snakeLives").setAttribute("aria-label", `剩餘 ${run.lives} 命`);
+          board.setAttribute("aria-label", `貪食蛇${mode.name}棋盤：已通過 ${run.completed} 關，蛇長 ${run.snake.length} 格，剩餘 ${run.fruits.size} 顆水果，障礙 ${run.obstacles.size} 個，剩餘 ${run.lives} 命`);
+        }
+        function spawnFruits(run) {
+          const occupied = new Set(run.snake);
+          const free = Array.from({ length: SIZE * SIZE }, (_, i) => i).filter((i) => !occupied.has(i));
+          const count = run.completed + 2;
+          run.fruits.clear();
+          for (let i = 0; i < count; i++) {
+            const j = i + Math.floor(Math.random() * (free.length - i));
+            [free[i], free[j]] = [free[j], free[i]];
+            run.fruits.set(free[i], FRUITS[Math.floor(Math.random() * FRUITS.length)]);
+          }
+        }
+        function obstaclesConnected(run) {
+          // Check only permanent barriers; the snake moves and is not a static wall.
+          const reached = new Set([run.snake[0]]);
+          const queue = [run.snake[0]];
+          for (let index = 0; index < queue.length; index++) {
+            const cell = queue[index];
+            const neighbors = [cell - SIZE, cell + SIZE];
+            if (cell % SIZE > 0) neighbors.push(cell - 1);
+            if (cell % SIZE < SIZE - 1) neighbors.push(cell + 1);
+            neighbors.forEach((next) => {
+              if (next < 0 || next >= SIZE * SIZE || run.obstacles.has(next) || reached.has(next)) return;
+              reached.add(next);
+              queue.push(next);
+            });
+          }
+          return reached.size === SIZE * SIZE - run.obstacles.size;
+        }
+        function spawnLevel(run) {
+          run.obstacles.clear();
+          spawnFruits(run);
+          if (run.mode !== "hard") return;
+          const level = run.completed + 1;
+          const count = level <= 3 ? 2 : level <= 6 ? 3 : 4;
+          const head = run.snake[0];
+          const occupied = new Set(run.snake);
+          const candidates = Array.from({ length: SIZE * SIZE }, (_, cell) => cell).filter((cell) => {
+            const distance = Math.abs(Math.floor(cell / SIZE) - Math.floor(head / SIZE)) + Math.abs(cell % SIZE - head % SIZE);
+            return distance >= 4 && !occupied.has(cell) && !run.fruits.has(cell);
+          });
+          for (let i = candidates.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+          }
+          for (const cell of candidates) {
+            run.obstacles.add(cell);
+            if (!obstaclesConnected(run)) run.obstacles.delete(cell);
+            if (run.obstacles.size === count) break;
+          }
+        }
+        function stopTones(run) {
+          run.tones.forEach(({ oscillator, gain }) => {
+            try { oscillator.stop(); } catch { /* Already stopped. */ }
+            oscillator.disconnect();
+            gain.disconnect();
+          });
+          run.tones.clear();
+        }
+        function prepareAudio() {
+          const Constructor = window.AudioContext || window.webkitAudioContext;
+          if (!Constructor) return;
+          try {
+            diceAudioContext ||= new Constructor();
+            if (diceAudioContext.state === "suspended") void diceAudioContext.resume().catch(() => {});
+          } catch { /* Sound is optional. */ }
+        }
+        function playFruitSound(run) {
+          const context = diceAudioContext;
+          if (!active(run) || phase !== "playing" || document.hidden || performance.now() >= run.deadline || context?.state !== "running") return;
+          try {
+            const oscillator = context.createOscillator();
+            const gain = context.createGain();
+            const time = context.currentTime;
+            oscillator.type = "sine";
+            oscillator.frequency.setValueAtTime(880, time);
+            oscillator.frequency.setValueAtTime(1320, time + .05);
+            gain.gain.setValueAtTime(.0001, time);
+            gain.gain.exponentialRampToValueAtTime(.12, time + .008);
+            gain.gain.exponentialRampToValueAtTime(.0001, time + .17);
+            oscillator.connect(gain);
+            gain.connect(context.destination);
+            const tone = { oscillator, gain };
+            run.tones.add(tone);
+            oscillator.onended = () => {
+              oscillator.disconnect();
+              gain.disconnect();
+              run.tones.delete(tone);
+            };
+            oscillator.start(time);
+            oscillator.stop(time + .18);
+          } catch { /* A failed sound never undoes a fruit pickup. */ }
+        }
+        function dispose() {
+          if (!session) return;
+          const run = session;
+          run.closed = true;
+          cancelAnimationFrame(run.frame);
+          clearTimeout(run.endTimer);
+          clearTimeout(run.rewardTimer);
+          run.animations.forEach((animation) => animation.cancel());
+          run.animations.clear();
+          run.turns.length = 0;
+          stopTones(run);
+          session = null;
+        }
+        function closeSnake() {
+          if (!session && !dialog.open) return;
+          dispose();
+          setPhase("closed", "");
+          document.body.style.overflow = previousOverflow;
+          dialog.close();
+          opener.focus({ preventScroll: true });
+        }
+        function openSnake() {
+          if (dialog.open || $("memoryDialog").open || $("collectDialog").open || state.busy || !modal.hidden) return;
+          dispose();
+          session = { closed: false, mode: null, snake: [8 * SIZE + 8], fruits: new Map(), obstacles: new Set(), direction: null, turns: [], completed: 0, eaten: 0, lives: 2, hit: false, frame: null, endTimer: null, tones: new Set(), animations: new Set(), rewardClaimed: false, rewardTimer: null, accumulator: 0, lastFrame: 0, deadline: 0 };
+          previousOverflow = document.body.style.overflow;
+          document.body.style.overflow = "hidden";
+          delete dialog.dataset.mode;
+          board.replaceChildren();
+          cells = Array.from({ length: SIZE * SIZE }, (_, position) => {
+            const cell = document.createElement("span");
+            cell.className = "snake-cell";
+            cell.dataset.cell = position;
+            cell.setAttribute("aria-hidden", "true");
+            board.appendChild(cell);
+            return cell;
+          });
+          seconds.textContent = "60";
+          seconds.parentElement.classList.remove("is-urgent");
+          result.replaceChildren();
+          rewardStage.replaceChildren();
+          rewardMessage.textContent = "";
+          setPhase("difficulty", "");
+          dialog.showModal();
+          normal.focus({ preventScroll: true });
+          dialog.scrollTop = 0;
+        }
+        function chooseMode(mode) {
+          if (!session || !active(session) || phase !== "difficulty" || !Object.hasOwn(MODES, mode)) return;
+          session.mode = mode;
+          session.lives = MODES[mode].lives;
+          dialog.dataset.mode = mode;
+          panel.setAttribute("aria-label", `${MODES[mode].name}模式`);
+          seconds.textContent = String(MODES[mode].duration / 1000);
+          spawnLevel(session);
+          render(session);
+          setPhase("preview", mode === "hard" ? "避開石塊！第 8～10 關加速，共 2 命。" : "方向鍵移動，吃水果；小心撞牆與自己！");
+          start.focus({ preventScroll: true });
+        }
+        function collide(run, reason) {
+          if (!active(run) || phase !== "playing") return;
+          if (performance.now() >= run.deadline) { finish(run, "時間到！"); return; }
+          run.lives--;
+          if (run.lives === 0) { finish(run, reason); return; }
+          run.direction = null;
+          run.turns.length = 0;
+          run.accumulator = 0;
+          run.hit = true;
+          stopTones(run);
+          render(run);
+          setPhase("reviving", `${reason}使用續命，按方向鍵繼續！`);
+        }
+        function finish(run, reason) {
+          if (!active(run) || !inRound()) return;
+          cancelAnimationFrame(run.frame);
+          clearTimeout(run.endTimer);
+          run.turns.length = 0;
+          stopTones(run);
+          seconds.textContent = String(Math.max(0, Math.ceil((run.deadline - performance.now()) / 1000)));
+          run.hit = reason === "撞到牆了！" || reason === "撞到自己了！" || reason === "撞到障礙物了！";
+          render(run);
+          setPhase("finished", "挑戰結束");
+          const title = document.createElement("strong");
+          title.textContent = reason;
+          result.replaceChildren(title, document.createTextNode(`已通過 ${run.completed} / ${MODES[run.mode].levels} 關 · 吃到 ${run.eaten} 顆水果`));
+          // The taller result layout can scroll the toolbar above the dialog viewport.
+          dialog.scrollTop = 0;
+          (canClaimReward(run) ? rewardButton : $("snakeClose")).focus({ preventScroll: true });
+        }
+        function snakeRewardForLevels(completed, mode) {
+          if (mode === "hard") {
+            if (completed === MODES.hard.levels) return { coins: 0, pokeChances: 1 };
+            return { coins: Math.max(1, completed - 1), pokeChances: 0 };
+          }
+          return { coins: Math.min(completed, MODES.normal.levels), pokeChances: 0 };
+        }
+        function claimSnakeReward(run) {
+          if (!run || !active(run) || phase !== "finished" || !canClaimReward(run)) return;
+          run.rewardClaimed = true;
+          const reward = snakeRewardForLevels(run.completed, run.mode);
+          state.coins += reward.coins;
+          state.pokeChances += reward.pokeChances;
+          updateToken();
+          rewardStage.replaceChildren();
+          rewardMessage.textContent = reward.pokeChances ? "戳戳樂 +1 次" : `獲得 ${reward.coins} 枚森林金幣${reward.coins === 1 ? "（參加獎）" : ""}！`;
+          setPhase("rewarding", `通過 ${run.completed} 關，領取你的${reward.coins === 1 ? "參加獎" : "獎勵"}！`);
+          $("snakeClose").focus({ preventScroll: true });
+          dialog.scrollTop = 0;
+          if (reward.pokeChances) {
+            const gift = document.createElement("div");
+            gift.className = "memory-reward-gift";
+            gift.innerHTML = '<span class="memory-reward-gift-icon">🎁</span><span class="memory-reward-gift-label">戳戳樂機會</span>';
+            rewardStage.appendChild(gift);
+            setPhase("rewarded", "十關全通！已獲得戳戳樂 +1 次。");
+            return;
+          }
+          const duration = animateRewardCoins(rewardStage, reward.coins, run.animations);
+          run.rewardTimer = window.setTimeout(() => {
+            if (!active(run) || phase !== "rewarding") return;
+            run.animations.forEach((animation) => animation.cancel());
+            run.animations.clear();
+            setPhase("rewarded", "獎勵已加入森林金幣！");
+          }, duration);
+        }
+        function move(run) {
+          if (run.turns.length) run.direction = run.turns.shift();
+          const head = run.snake[0];
+          const direction = run.direction;
+          const next = head + DIRECTIONS[direction];
+          const crossesWall = next < 0 || next >= SIZE * SIZE ||
+            (direction === "ArrowLeft" && head % SIZE === 0) ||
+            (direction === "ArrowRight" && head % SIZE === SIZE - 1);
+          if (crossesWall) { collide(run, "撞到牆了！"); return; }
+          if (run.obstacles.has(next)) { collide(run, "撞到障礙物了！"); return; }
+          const growing = run.fruits.has(next);
+          const solidBody = growing ? run.snake : run.snake.slice(0, -1);
+          if (solidBody.includes(next)) { collide(run, "撞到自己了！"); return; }
+          run.snake.unshift(next);
+          if (!growing) run.snake.pop();
+          else {
+            run.fruits.delete(next);
+            run.eaten++;
+            playFruitSound(run);
+            if (run.fruits.size === 0) {
+              run.completed++;
+              if (run.completed === MODES[run.mode].levels) { finish(run, run.mode === "hard" ? "十關全部完成！" : "六關全部完成！"); return; }
+              spawnLevel(run);
+              run.accumulator = 0;
+              status.textContent = `第 ${run.completed + 1} 關！繼續吃水果。`;
+            }
+          }
+          render(run);
+        }
+        function tick(run, now) {
+          if (!active(run) || !inRound()) return;
+          if (now >= run.deadline) { finish(run, "時間到！"); return; }
+          const remaining = Math.ceil((run.deadline - now) / 1000);
+          seconds.textContent = String(remaining);
+          seconds.parentElement.classList.toggle("is-urgent", remaining <= 5);
+          const gap = now - run.lastFrame;
+          run.lastFrame = now;
+          if (document.hidden || !run.direction || gap > 250) run.accumulator = 0;
+          else {
+            run.accumulator += gap;
+            const step = movementStep(run);
+            if (run.accumulator >= step) {
+              run.accumulator %= step;
+              move(run);
+            }
+          }
+          if (inRound()) run.frame = requestAnimationFrame((time) => tick(run, time));
+        }
+        function begin(run) {
+          if (!active(run) || phase !== "preview") return;
+          const now = performance.now();
+          run.lastFrame = now;
+          run.deadline = now + MODES[run.mode].duration;
+          setPhase("playing", "按方向鍵出發！");
+          $("snakeClose").focus({ preventScroll: true });
+          prepareAudio();
+          run.endTimer = window.setTimeout(() => finish(run, "時間到！"), MODES[run.mode].duration);
+          run.frame = requestAnimationFrame((time) => tick(run, time));
+        }
+        function turn(run, direction) {
+          const now = performance.now();
+          if (now >= run.deadline) { finish(run, "時間到！"); return; }
+          if (document.hidden) return;
+          if (!run.direction) {
+            run.direction = direction;
+            run.lastFrame = now;
+            run.accumulator = 0;
+            run.hit = false;
+            render(run);
+            setPhase("playing", "吃完水果就進下一關！");
+            return;
+          }
+          const planned = run.turns.at(-1) || run.direction;
+          if (direction === planned || DIRECTIONS[direction] === -DIRECTIONS[planned] || run.turns.length >= 2) return;
+          run.turns.push(direction);
+        }
+        opener.addEventListener("click", openSnake);
+        modeButtons.forEach((button) => button.addEventListener("click", () => chooseMode(button.dataset.snakeMode)));
+        start.addEventListener("click", () => { if (session) begin(session); });
+        rewardButton.addEventListener("click", () => claimSnakeReward(session));
+        $("snakeClose").addEventListener("click", closeSnake);
+        dialog.addEventListener("cancel", (event) => { event.preventDefault(); closeSnake(); });
+        dialog.addEventListener("close", () => { if (!dialog.open && session) closeSnake(); });
+        document.addEventListener("keydown", (event) => {
+          if (!dialog.open || !session) return;
+          if (Object.hasOwn(DIRECTIONS, event.key)) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            if (inRound() && !event.repeat) turn(session, event.key);
+          } else if (event.key === "Escape") {
+            event.preventDefault(); event.stopImmediatePropagation(); closeSnake();
+          } else if (event.key === "Tab") {
+            const buttons = [...dialog.querySelectorAll("button:not(:disabled)")].filter((button) => button.getClientRects().length > 0);
+            const index = buttons.indexOf(document.activeElement);
+            const next = index < 0 ? (event.shiftKey ? buttons.length - 1 : 0) : (index + (event.shiftKey ? -1 : 1) + buttons.length) % buttons.length;
+            event.preventDefault(); event.stopImmediatePropagation(); buttons[next]?.focus({ preventScroll: true });
+          }
+        }, true);
+        window.addEventListener("blur", () => { if (session) session.turns.length = 0; });
+        document.addEventListener("visibilitychange", () => {
+          const run = session;
+          if (!run || !inRound()) return;
+          run.turns.length = 0;
+          run.accumulator = 0;
+          run.lastFrame = performance.now();
+          if (document.hidden) stopTones(run);
+          else if (run.lastFrame >= run.deadline) finish(run, "時間到！");
         });
       })();
 
