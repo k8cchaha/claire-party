@@ -381,7 +381,7 @@
     .memory-difficulty { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding: 30px 0 12px; }
     .memory-difficulty-button { display: grid; justify-items: center; align-content: center; gap: 12px; min-width: 0; min-height: 190px; padding: 20px 12px; border: 2px solid var(--memory-border); border-radius: 20px; color: var(--memory-deep); background: var(--memory-soft); font-family: var(--serif); font-size: clamp(26px, 6vw, 36px); font-weight: 900; box-shadow: 0 5px 0 var(--memory-border); cursor: pointer; }
     .memory-difficulty-art { display: block; width: clamp(72px, 20vw, 100px); height: clamp(72px, 20vw, 100px); padding: 5px; border-radius: 50%; background: #fff7fb; object-fit: contain; pointer-events: none; }
-    .memory-difficulty-button[data-memory-mode="hard"] { color: #fff; background: var(--memory-purple); border-color: var(--memory-purple); box-shadow: 0 5px 0 var(--memory-deep); }
+    .memory-difficulty-button:is([data-memory-mode="hard"], [data-collect-mode="hard"]) { color: #fff; background: var(--memory-purple); border-color: var(--memory-purple); box-shadow: 0 5px 0 var(--memory-deep); }
     .memory-difficulty-button:not(:disabled):hover { filter: brightness(1.05); }
     .memory-difficulty-button:not(:disabled):active { transform: translateY(3px); box-shadow: none; }
     .memory-board-wrap { position: relative; }
@@ -447,6 +447,33 @@
     @media (prefers-reduced-motion: reduce) {
       .memory-card-inner { transition: none; }
     }
+
+    .collect-dialog { width: min(700px, calc(100% - 32px)); }
+    .collect-dialog .memory-kicker { display: none; }
+    .collect-dialog .memory-header { align-items: center; }
+    .collect-dialog .memory-difficulty-button:disabled { opacity: .55; cursor: not-allowed; }
+    .collect-mode-note { font-family: var(--sans); font-size: 12px; }
+    .collect-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 8px 0 10px; }
+    .collect-toolbar .memory-action { min-width: 72px; }
+    .collect-status { flex: 1 1 130px; margin: 0; color: #73647f; font-size: 12px; line-height: 1.4; }
+    .collect-timer { margin-left: auto; }
+    .collect-stage { position: relative; aspect-ratio: 600 / 480; overflow: hidden; border: 2px solid var(--memory-border); border-radius: 18px; background: linear-gradient(#e4defc, #fff3df 78%); isolation: isolate; }
+    .collect-stage::before { position: absolute; top: 12%; left: 9%; width: 22%; height: 8%; border-radius: 50px; background: rgba(255,255,255,.7); box-shadow: 250px 40px 0 rgba(255,255,255,.6), 110px -25px 0 rgba(255,255,255,.45); content: ""; }
+    .collect-road { position: absolute; inset: 83% 0 0; border-top: 3px solid #a99cc0; background: #d2c6e1; }
+    .collect-road::after { position: absolute; top: 56%; width: 100%; height: 4px; background: repeating-linear-gradient(90deg, transparent 0 20px, #fff8da 20px 58px, transparent 58px 80px); content: ""; }
+    .collect-rider { position: absolute; z-index: 3; left: 50%; top: 66.25%; width: 20%; height: 28.75%; object-fit: contain; border-radius: 12px; transform: translateX(-50%); pointer-events: none; }
+    .collect-falling { position: absolute; z-index: 2; transform: translate(-50%, -50%); pointer-events: none; filter: drop-shadow(0 3px 2px rgba(121,82,27,.2)); }
+    .collect-falling svg { display: block; width: 100%; height: 100%; }
+    .collect-overlay { position: absolute; z-index: 4; inset: 0; display: grid; align-content: start; justify-items: center; padding: 18% 10px 0 114px; pointer-events: none; }
+    .collect-overlay strong { padding: 10px 14px; border: 1px solid var(--memory-border); border-radius: 18px; color: var(--memory-deep); background: rgba(255,250,253,.94); font-family: var(--serif); font-size: clamp(18px, 5vw, 34px); white-space: nowrap; }
+    .collect-scoreboard { position: absolute; z-index: 5; top: 8px; left: 8px; padding: 7px 9px; border: 1px solid var(--memory-border); border-radius: 12px; background: rgba(255,250,253,.88); color: var(--memory-deep); pointer-events: none; font-size: clamp(10px, 2.8vw, 12px); font-variant-numeric: tabular-nums; }
+    .collect-dialog[data-phase="playing"] .collect-scoreboard { z-index: 1; opacity: .45; background: transparent; border-color: transparent; }
+    .collect-inventory { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
+    .collect-inventory li { display: grid; grid-template-columns: 22px auto 1ch minmax(2ch, auto); align-items: center; gap: 4px; }
+    .collect-inventory svg { display: block; width: 22px; height: 22px; }
+    .collect-item-count { text-align: right; font-weight: 900; }
+    .collect-score-total { display: flex; justify-content: space-between; gap: 10px; margin: 5px 0 0; padding-top: 5px; border-top: 1px solid var(--memory-border); font-weight: 800; }
+    .collect-score-total strong { font-size: 1.15em; }
 
     @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
     @keyframes pop-in { from { transform: translateY(12px) scale(.96); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
@@ -693,6 +720,39 @@
     <section class="memory-reward-panel" id="memoryRewardPanel" aria-label="記憶挑戰獎勵" hidden>
       <div class="memory-reward-stage" id="memoryRewardStage" aria-hidden="true"></div>
       <p class="memory-reward-message" id="memoryRewardMessage" role="status"></p>
+    </section>
+  </dialog>
+
+  <dialog class="memory-dialog collect-dialog" id="collectDialog" aria-labelledby="collectTitle">
+    <header class="memory-header">
+      <h2 class="memory-title" id="collectTitle">收集金幣</h2>
+      <button class="memory-close" id="collectClose" type="button" aria-label="關閉收集金幣">×</button>
+    </header>
+    <section class="memory-difficulty" id="collectDifficulty" aria-label="選擇難度">
+      <button class="memory-difficulty-button" id="collectEasy" type="button"><img class="memory-difficulty-art" src="./games/collectcoin/reest.png" alt="" draggable="false"><span>簡單</span></button>
+      <button class="memory-difficulty-button" type="button" data-collect-mode="hard" disabled><img class="memory-difficulty-art" src="./games/collectcoin/right.png" alt="" draggable="false"><span>困難</span><span class="collect-mode-note">開發中</span></button>
+    </section>
+    <section id="collectGamePanel" aria-label="簡單模式" hidden>
+      <div class="collect-toolbar">
+        <button class="memory-action" id="collectStart" type="button" disabled>開始</button>
+        <button class="memory-action" id="collectReward" type="button" hidden>獲取獎勵</button>
+        <p class="collect-status" id="collectStatus" role="status">正在準備角色…</p>
+        <div class="memory-timer collect-timer" role="timer" aria-label="遊戲剩餘時間">剩下 <strong id="collectSeconds">30</strong> 秒</div>
+      </div>
+      <div class="collect-stage" id="collectStage" role="region" aria-label="左右方向鍵移動機車，接住掉落的寶物">
+        <div class="collect-road" aria-hidden="true"></div>
+        <div id="collectDrops" aria-hidden="true"></div>
+        <img class="collect-rider" id="collectRider" src="./games/collectcoin/reest.png" alt="騎機車的酷洛米" draggable="false">
+        <div class="collect-overlay" id="collectOverlay" hidden><strong>時間到！</strong></div>
+        <aside class="collect-scoreboard" aria-label="寶物計分與收集數量">
+          <ul class="collect-inventory" id="collectInventory" aria-label="各種寶物收集數量"></ul>
+          <p class="collect-score-total"><span>總分</span><strong id="collectScore">0</strong></p>
+        </aside>
+      </div>
+      <section class="memory-reward-panel" id="collectRewardPanel" aria-label="收集金幣獎勵" hidden>
+        <div class="memory-reward-stage" id="collectRewardStage" aria-hidden="true"></div>
+        <p class="memory-reward-message" id="collectRewardMessage" role="status"></p>
+      </section>
     </section>
   </dialog>
 
@@ -1219,6 +1279,31 @@
         if (event.key === "Escape" && !modal.hidden && !state.busy) closeModal();
       });
 
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+      function animateRewardCoins(stage, count, animations) {
+        const duration = 1500;
+        const stagger = 180;
+        for (let index = 0; index < count; index++) {
+          const coin = document.createElement("span");
+          coin.className = "memory-reward-coin";
+          coin.textContent = "🪙";
+          coin.style.left = `${8 + (index + .5) / count * 72}%`;
+          const landing = stage.clientHeight - 65 - (index % 3) * 10;
+          stage.appendChild(coin);
+          coin.style.transform = `translate(-50%, ${landing}px)`;
+          if (!reducedMotion.matches) {
+            animations.add(coin.animate([
+              { transform: "translate(-50%, -65px) rotate(-35deg)", opacity: 0 },
+              { transform: "translate(-50%, -40px) rotate(-25deg)", opacity: 1, offset: .08 },
+              { transform: `translate(-50%, ${landing}px) rotate(20deg)`, opacity: 1, offset: .75 },
+              { transform: `translate(-50%, ${landing - 32}px) rotate(-10deg)`, opacity: 1, offset: .88 },
+              { transform: `translate(-50%, ${landing}px) rotate(0deg)`, opacity: 1 },
+            ], { duration, delay: index * stagger, easing: "ease-in", fill: "backwards" }));
+          }
+        }
+        return duration + (count - 1) * stagger;
+      }
+
       // The minigame runs independently; only claiming rewards updates map counters.
       (() => {
         const dialog = $("memoryDialog");
@@ -1244,7 +1329,6 @@
           hard: Object.freeze({ columns: 4, count: 16, folder: "game4x4", seconds: 15, optionColumns: 8, specials: true, participationThreshold: 8 }),
         });
         let specialUses = { angel: 0, hint: 0 };
-        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
         // Hint keys match the image filenames: 1 -> img1.png, ..., 16 -> img16.png.
         const MEMORY_HINTS = Object.freeze({
           1: "我是世界上最知名的經典代表之一, 陪伴大家度過無數個年頭",
@@ -1529,7 +1613,7 @@
         }
 
         function openMemory() {
-          if (dialog.open || state.busy || !modal.hidden) return;
+          if (dialog.open || $("collectDialog").open || state.busy || !modal.hidden) return;
           dispose();
           session = { controller: new AbortController(), animations: new Set(), tones: new Set(), mode: null, correctCount: null, rewardClaimed: false };
           delete dialog.dataset.mode;
@@ -1745,29 +1829,9 @@
             setPhase("rewarded", "16 張全對！已獲得戳戳樂 +1 次。");
             return;
           }
-          const duration = 1500;
-          const stagger = 180;
-          for (let index = 0; index < reward.coins; index++) {
-            const coin = document.createElement("span");
-            coin.className = "memory-reward-coin";
-            coin.textContent = "🪙";
-            coin.style.left = `${8 + (index + .5) / reward.coins * 72}%`;
-            const landing = rewardStage.clientHeight - 65 - (index % 3) * 10;
-            rewardStage.appendChild(coin);
-            coin.style.transform = `translate(-50%, ${landing}px)`;
-            if (!reducedMotion.matches) {
-              const animation = coin.animate([
-                { transform: "translate(-50%, -65px) rotate(-35deg)", opacity: 0 },
-                { transform: "translate(-50%, -40px) rotate(-25deg)", opacity: 1, offset: .08 },
-                { transform: `translate(-50%, ${landing}px) rotate(20deg)`, opacity: 1, offset: .75 },
-                { transform: `translate(-50%, ${landing - 32}px) rotate(-10deg)`, opacity: 1, offset: .88 },
-                { transform: `translate(-50%, ${landing}px) rotate(0deg)`, opacity: 1 },
-              ], { duration, delay: index * stagger, easing: "ease-in", fill: "backwards" });
-              run.animations.add(animation);
-            }
-          }
+          const rewardDuration = animateRewardCoins(rewardStage, reward.coins, run.animations);
           try {
-            await delay(duration + (reward.coins - 1) * stagger, run);
+            await delay(rewardDuration, run);
             if (!active(run)) return;
             run.animations.forEach((animation) => animation.cancel());
             run.animations.clear();
@@ -1850,6 +1914,448 @@
             focusable[next]?.focus({ preventScroll: true });
           }
         }, true);
+      })();
+
+      // Coin collection has its own score and lifecycle; map rewards remain separate.
+      (() => {
+        const dialog = $("collectDialog");
+        const opener = document.querySelector('[data-minigame="2"]');
+        const difficulty = $("collectDifficulty");
+        const panel = $("collectGamePanel");
+        const start = $("collectStart");
+        const status = $("collectStatus");
+        const rider = $("collectRider");
+        const drops = $("collectDrops");
+        const inventory = $("collectInventory");
+        const seconds = $("collectSeconds");
+        const overlay = $("collectOverlay");
+        const stage = $("collectStage");
+        const rewardButton = $("collectReward");
+        const rewardPanel = $("collectRewardPanel");
+        const rewardStage = $("collectRewardStage");
+        const rewardMessage = $("collectRewardMessage");
+        const WIDTH = 600;
+        const HEIGHT = 480;
+        const RIDER_WIDTH = 120;
+        const CATCH_Y = 390;
+        const DURATION = 30000;
+        const art = (content) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true">${content}</svg>`;
+        const coinArt = (fill, edge) => art(`<circle cx="32" cy="32" r="27" fill="${edge}"/><circle cx="30" cy="29" r="23" fill="${fill}" stroke="${edge}" stroke-width="2"/><circle cx="30" cy="29" r="17" fill="none" stroke="${edge}" stroke-width="2"/><path d="m30 16 4 8 9 1-7 6 2 9-8-5-8 5 2-9-7-6 9-1z" fill="${edge}"/><path d="m16 13 5-3" stroke="#fff" stroke-width="4" stroke-linecap="round"/>`);
+        const ITEMS = [
+          { key: "silver", name: "小銀幣", quota: 15, points: 1, size: 26, svg: coinArt("#edf2f6", "#8c9aac") },
+          { key: "gold", name: "小金幣", quota: 20, points: 2, size: 28, svg: coinArt("#ffe38a", "#d59628") },
+          { key: "large", name: "大金幣", quota: 12, points: 3, size: 40, svg: coinArt("#ffce49", "#b87b19") },
+          { key: "bag", name: "錢袋", quota: 8, points: 5, size: 46, svg: art('<path d="m21 5 11 4 11-4-6 14c8 8 19 19 17 29-2 11-42 11-44 0-2-10 9-21 17-29z" fill="#eec97d" stroke="#a87531" stroke-width="3"/><path d="M24 20h16" stroke="#9d633a" stroke-width="5" stroke-linecap="round"/><text x="32" y="47" text-anchor="middle" font-size="25" font-weight="bold" fill="#9d633a">$</text>') },
+          { key: "chest", name: "寶箱", quota: 3, points: 10, size: 54, svg: art('<path d="M6 29V19C6 3 58 3 58 19v10z" fill="#b67940" stroke="#71472e" stroke-width="3"/><rect x="6" y="29" width="52" height="27" rx="4" fill="#a56839" stroke="#71472e" stroke-width="3"/><path d="M16 9v47m32-47v47M6 30h52" stroke="#ffd36f" stroke-width="5"/><rect x="26" y="26" width="12" height="16" rx="2" fill="#ffe59b" stroke="#b58626" stroke-width="2"/><circle cx="32" cy="33" r="2" fill="#71472e"/><path d="m54 0 2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#ffe081"/>') },
+        ];
+        let session = null;
+        let previousOverflow = "";
+        let phase = "closed";
+        let collectMusicBuffer = null;
+        let pendingMapMusicRestore = false;
+
+        function active(run) { return session === run && dialog.open && !run.closed; }
+        function canPlayAudio(run) {
+          return active(run) && phase === "playing" && !document.hidden &&
+            performance.now() - run.startedAt < DURATION && diceAudioContext?.state === "running";
+        }
+        function createCollectMusicBuffer(context) {
+          const step = .2; // 150 BPM, two notes per beat.
+          const melody = [76, 79, 83, 79, 76, 79, 84, 83, 74, 78, 81, 78, 74, 78, 83, 81,
+            72, 76, 79, 76, 72, 76, 81, 79, 74, 78, 81, 83, 86, 83, 81, 78];
+          const bass = [52, 50, 48, 50];
+          const duration = step * melody.length;
+          const buffer = context.createBuffer(1, Math.round(context.sampleRate * duration), context.sampleRate);
+          const samples = buffer.getChannelData(0);
+          const frequency = (note) => 440 * 2 ** ((note - 69) / 12);
+          for (let i = 0; i < samples.length; i++) {
+            const time = i / context.sampleRate;
+            const note = Math.floor(time / step);
+            const local = time - note * step;
+            const hz = frequency(melody[note % melody.length]);
+            const envelope = Math.min(1, local / .008) * Math.exp(-local * 16);
+            const lead = (Math.sin(2 * Math.PI * hz * local) + .25 * Math.sin(6 * Math.PI * hz * local)) * envelope * .24;
+            const beatTime = time % .4;
+            const bassHz = frequency(bass[Math.floor(time / 1.6) % bass.length]);
+            const low = Math.sin(2 * Math.PI * bassHz * beatTime) * Math.exp(-beatTime * 9) * .14;
+            const kick = Math.sin(2 * Math.PI * (58 * beatTime + 1.8 * (1 - Math.exp(-beatTime * 35)))) * Math.exp(-beatTime * 32) * .18;
+            const noise = Math.sin(i * 12.9898) * Math.sin(i * 78.233);
+            const hat = noise * Math.exp(-local * 100) * .06;
+            const snareTime = time % .8 - .4;
+            const snare = snareTime >= 0 ? noise * Math.exp(-snareTime * 38) * .1 : 0;
+            const fade = Math.max(0, Math.min(1, time / .008, (duration - time) / .018));
+            samples[i] = (lead + low + kick + hat + snare) * fade;
+          }
+          return buffer;
+        }
+        function startCollectMusic(run) {
+          if (!canPlayAudio(run) || !backgroundMusicEnabled || run.music) return;
+          try {
+            const context = diceAudioContext;
+            collectMusicBuffer ||= createCollectMusicBuffer(context);
+            const source = context.createBufferSource();
+            const gain = context.createGain();
+            run.music = { source, gain };
+            const elapsed = (performance.now() - run.startedAt) / 1000;
+            run.musicFast = elapsed >= 25;
+            source.buffer = collectMusicBuffer;
+            source.loop = true;
+            source.playbackRate.setValueAtTime(run.musicFast ? 1.15 : 1, context.currentTime);
+            gain.gain.setValueAtTime(0, context.currentTime);
+            gain.gain.linearRampToValueAtTime(.22, context.currentTime + .08);
+            source.connect(gain);
+            gain.connect(context.destination);
+            source.start(0, (Math.min(elapsed, 25) + Math.max(0, elapsed - 25) * 1.15) % collectMusicBuffer.duration);
+          } catch {
+            stopCollectAudio(run);
+          }
+        }
+        function prepareCollectAudio(run) {
+          const Constructor = window.AudioContext || window.webkitAudioContext;
+          if (!Constructor) return;
+          try {
+            // Resume synchronously on Start; late resolution must not revive a closed round.
+            diceAudioContext ||= new Constructor();
+            if (diceAudioContext.state === "suspended") {
+              void diceAudioContext.resume().then(() => startCollectMusic(run)).catch(() => {});
+            } else startCollectMusic(run);
+          } catch {
+            // Audio is optional: movement, collection and the deadline still work.
+          }
+        }
+        function playPickupSound(run, type) {
+          if (!canPlayAudio(run)) return;
+          try {
+            const context = diceAudioContext;
+            const oscillator = context.createOscillator();
+            const gain = context.createGain();
+            const time = context.currentTime;
+            const rich = type.key === "bag" || type.key === "chest";
+            const duration = rich ? .24 : .16;
+            oscillator.type = "sine";
+            oscillator.frequency.setValueAtTime(988, time);
+            oscillator.frequency.setValueAtTime(1480, time + .055);
+            if (rich) oscillator.frequency.setValueAtTime(1976, time + .115);
+            gain.gain.setValueAtTime(.0001, time);
+            gain.gain.exponentialRampToValueAtTime(.13, time + .006);
+            gain.gain.exponentialRampToValueAtTime(.0001, time + duration);
+            oscillator.connect(gain);
+            gain.connect(context.destination);
+            const tone = { oscillator, gain };
+            run.tones.add(tone);
+            oscillator.onended = () => {
+              oscillator.disconnect();
+              gain.disconnect();
+              run.tones.delete(tone);
+            };
+            oscillator.start(time);
+            oscillator.stop(time + duration + .01);
+          } catch {
+            // A missing sound must never undo a successful catch.
+          }
+        }
+        function stopCollectAudio(run) {
+          if (run.music) {
+            try { run.music.source.stop(); } catch { /* Already stopped. */ }
+            run.music.source.disconnect();
+            run.music.gain.disconnect();
+            run.music = null;
+          }
+          run.tones.forEach(({ oscillator, gain }) => {
+            try { oscillator.stop(); } catch { /* Already stopped. */ }
+            oscillator.disconnect();
+            gain.disconnect();
+          });
+          run.tones.clear();
+        }
+        function restoreMapMusic(run) {
+          if (run?.restoreMapMusic) {
+            run.restoreMapMusic = false;
+            pendingMapMusicRestore = true;
+          }
+          if (!pendingMapMusicRestore || document.hidden || phase === "playing") return;
+          pendingMapMusicRestore = false;
+          if (backgroundMusicEnabled && state.started && !state.gameOver && !backgroundMusicSource) startBackgroundMusic();
+        }
+        function setPhase(next, message) {
+          phase = next;
+          dialog.dataset.phase = next;
+          status.textContent = message;
+          difficulty.hidden = next !== "difficulty";
+          $("collectEasy").disabled = next !== "difficulty";
+          panel.hidden = next === "difficulty" || next === "closed";
+          start.hidden = !["difficulty", "loading", "preview", "error"].includes(next);
+          start.disabled = !["preview", "error"].includes(next);
+          rewardButton.hidden = next !== "finished";
+          rewardButton.disabled = next !== "finished";
+          const showingReward = next === "rewarding" || next === "rewarded";
+          stage.hidden = showingReward;
+          rewardPanel.hidden = !showingReward;
+        }
+        function pose(name) {
+          if (rider.dataset.pose === name) return;
+          rider.dataset.pose = name;
+          rider.src = `./games/collectcoin/${name === "rest" ? "reest" : name}.png`;
+        }
+        function clearKeys(run) { if (run) run.keys.clear(); pose("rest"); }
+        function direction(run) {
+          if (run.keys.size === 0) return 0;
+          return [...run.keys].at(-1) === "ArrowLeft" ? -1 : 1;
+        }
+        function scoreFor(run) {
+          return ITEMS.reduce((sum, item) => sum + run.counts[item.key] * item.points, 0);
+        }
+        function updateCounts(run) {
+          ITEMS.forEach((item) => {
+            const count = run.counts[item.key];
+            const counter = inventory.querySelector(`[data-count="${item.key}"]`);
+            counter.textContent = String(count);
+            counter.closest("li").setAttribute("aria-label", `${item.name}，每個${item.points}分：已收集${count}個`);
+          });
+          $("collectScore").textContent = String(scoreFor(run));
+          inventory.setAttribute("aria-label", `收集結果：${ITEMS.map((item) => `${item.name}${run.counts[item.key]}個`).join("，")}`);
+        }
+        function buildInventory(run) {
+          inventory.innerHTML = [...ITEMS].reverse().map((item) => `<li>${item.svg}<span aria-hidden="true">(x${item.points})</span><span aria-hidden="true">:</span><span class="collect-item-count" data-count="${item.key}">0</span></li>`).join("");
+          updateCounts(run);
+        }
+        function dispose() {
+          if (!session) return;
+          const run = session;
+          run.closed = true;
+          cancelAnimationFrame(run.frame);
+          clearTimeout(run.endTimer);
+          clearTimeout(run.rewardTimer);
+          run.animations.forEach((animation) => animation.cancel());
+          run.animations.clear();
+          stopCollectAudio(run);
+          clearKeys(run);
+          run.items.forEach((item) => item.element?.remove());
+          session = null;
+          if (phase === "playing") phase = "closed";
+          restoreMapMusic(run);
+        }
+        function closeCollect() {
+          dispose();
+          setPhase("closed", "");
+          document.body.style.overflow = previousOverflow;
+          dialog.close();
+          opener.focus({ preventScroll: true });
+        }
+        function openCollect() {
+          if (dialog.open || $("memoryDialog").open || state.busy || !modal.hidden) return;
+          dispose();
+          session = { closed: false, keys: new Set(), items: [], tones: new Set(), animations: new Set(), rewardClaimed: false, rewardTimer: null, finalScore: null, music: null, musicFast: false, restoreMapMusic: false, counts: Object.fromEntries(ITEMS.map((item) => [item.key, 0])), x: WIDTH / 2, frame: null, endTimer: null };
+          previousOverflow = document.body.style.overflow;
+          document.body.style.overflow = "hidden";
+          drops.replaceChildren();
+          rewardStage.replaceChildren();
+          rewardMessage.textContent = "";
+          overlay.hidden = true;
+          seconds.textContent = "30";
+          seconds.parentElement.classList.remove("is-urgent");
+          rider.style.left = "50%";
+          pose("rest");
+          start.textContent = "開始";
+          buildInventory(session);
+          setPhase("difficulty", "");
+          dialog.showModal();
+          $("collectEasy").focus({ preventScroll: true });
+          dialog.scrollTop = 0;
+        }
+        async function loadRider(run) {
+          setPhase("loading", "正在準備角色…");
+          try {
+            await Promise.all(["left", "right", "rest"].map((name) => {
+              const image = new Image();
+              image.src = `./games/collectcoin/${name === "rest" ? "reest" : name}.png`;
+              return image.decode();
+            }));
+            if (!active(run)) return;
+            start.textContent = "開始";
+            setPhase("preview", "按住 ← / → 移動，接住掉落的寶物！");
+            start.focus({ preventScroll: true });
+          } catch {
+            if (!active(run)) return;
+            start.textContent = "重新載入";
+            setPhase("error", "角色載入失敗，請重新載入。");
+          }
+        }
+        function makeSchedule() {
+          const types = ITEMS.flatMap((item) => Array(item.quota).fill(item));
+          for (let i = types.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [types[i], types[j]] = [types[j], types[i]];
+          }
+          const steadyCount = 40;
+          const rushCount = types.length - steadyCount;
+          return types.map((type, index) => {
+            const rush = index >= steadyCount;
+            const spawn = rush ? 25000 + (index - steadyCount) * (3500 / (rushCount - 1))
+              : 500 + index * (24000 / (steadyCount - 1));
+            // Keep the full catch window before 29.7s, even for the final treasure.
+            const latestTravel = (DURATION - 300 - spawn) * (HEIGHT + type.size) / (CATCH_Y + 14 + type.size);
+            const travel = rush ? Math.min(2400 + Math.random() * 500, latestTravel) : 3200 + Math.random() * 500;
+            return {
+              type, spawn, x: type.size / 2 + Math.random() * (WIDTH - type.size), travel,
+              spawned: false, resolved: false, element: null,
+            };
+          });
+        }
+        function coinsForScore(score) {
+          return score >= 130 ? 6 : score >= 120 ? 5 : score >= 110 ? 4 : score >= 100 ? 3 : score >= 90 ? 2 : 1;
+        }
+        function claimCollectReward(run) {
+          if (!run || !active(run) || phase !== "finished" || run.rewardClaimed || run.finalScore === null) return;
+          // Grant before animating; closing or repeated clicks cannot revoke or duplicate it.
+          run.rewardClaimed = true;
+          const coins = coinsForScore(run.finalScore);
+          state.coins += coins;
+          updateToken();
+          rewardStage.replaceChildren();
+          rewardMessage.textContent = `獲得 ${coins} 枚森林金幣！`;
+          setPhase("rewarding", `${run.finalScore} 分，領取你的${run.finalScore < 90 ? "參加獎" : "獎勵"}！`);
+          $("collectClose").focus({ preventScroll: true });
+          dialog.scrollTop = 0;
+          const duration = animateRewardCoins(rewardStage, coins, run.animations);
+          run.rewardTimer = window.setTimeout(() => {
+            if (!active(run) || phase !== "rewarding") return;
+            run.animations.forEach((animation) => animation.cancel());
+            run.animations.clear();
+            setPhase("rewarded", "獎勵已加入森林金幣！");
+          }, duration);
+        }
+        function finish(run) {
+          if (!active(run) || phase !== "playing") return;
+          cancelAnimationFrame(run.frame);
+          clearTimeout(run.endTimer);
+          clearKeys(run);
+          run.items.forEach((item) => item.element?.remove());
+          seconds.textContent = "0";
+          overlay.hidden = false;
+          const total = Object.values(run.counts).reduce((sum, count) => sum + count, 0);
+          run.finalScore = scoreFor(run);
+          setPhase("finished", `收集完成！共接到 ${total} 個寶物，總分 ${run.finalScore} 分。`);
+          stopCollectAudio(run);
+          restoreMapMusic(run);
+          rewardButton.focus({ preventScroll: true });
+        }
+        function tick(run, now) {
+          if (!active(run) || phase !== "playing") return;
+          const elapsed = now - run.startedAt;
+          if (elapsed >= DURATION) { finish(run); return; }
+          const gap = now - run.lastFrame;
+          const dt = Math.min(gap, 50) / 1000;
+          run.lastFrame = now;
+          const moving = direction(run);
+          run.x = Math.max(RIDER_WIDTH / 2, Math.min(WIDTH - RIDER_WIDTH / 2, run.x + moving * 320 * dt));
+          rider.style.left = `${run.x / WIDTH * 100}%`;
+          pose(moving < 0 ? "left" : moving > 0 ? "right" : "rest");
+          const remaining = Math.ceil((DURATION - elapsed) / 1000);
+          seconds.textContent = String(remaining);
+          seconds.parentElement.classList.toggle("is-urgent", remaining <= 5);
+          if (elapsed >= 25000 && run.music && !run.musicFast) {
+            run.musicFast = true;
+            run.music.source.playbackRate.setValueAtTime(1.15, diceAudioContext.currentTime);
+          }
+          for (const item of run.items) {
+            if (item.resolved || elapsed < item.spawn) continue;
+            if (!item.spawned) {
+              item.spawned = true;
+              const element = document.createElement("span");
+              element.className = "collect-falling";
+              element.dataset.type = item.type.key;
+              element.innerHTML = item.type.svg;
+              element.style.width = `${item.type.size / WIDTH * 100}%`;
+              element.style.height = `${item.type.size / HEIGHT * 100}%`;
+              element.style.left = `${item.x / WIDTH * 100}%`;
+              drops.appendChild(element);
+              item.element = element;
+            }
+            const yAt = (time) => -item.type.size / 2 + (time - item.spawn) / item.travel * (HEIGHT + item.type.size);
+            const y = yAt(elapsed);
+            const radius = item.type.size / 2;
+            const previousY = yAt(Math.max(item.spawn, run.previousElapsed));
+            const overlaps = y + radius >= CATCH_Y - 14 && previousY - radius <= CATCH_Y + 14;
+            const canCatch = gap <= 250 && !document.hidden && overlaps && Math.abs(item.x - run.x) <= RIDER_WIDTH * .4 + radius;
+            if (canCatch) {
+              item.resolved = true;
+              item.element.remove();
+              run.counts[item.type.key]++;
+              updateCounts(run);
+              playPickupSound(run, item.type);
+            } else if (y - radius > HEIGHT) {
+              item.resolved = true;
+              item.element.remove();
+            } else {
+              item.element.style.top = `${y / HEIGHT * 100}%`;
+            }
+          }
+          run.previousElapsed = elapsed;
+          run.frame = requestAnimationFrame((time) => tick(run, time));
+        }
+        function begin(run) {
+          if (!active(run) || phase !== "preview") return;
+          run.items = makeSchedule();
+          run.startedAt = performance.now();
+          run.lastFrame = run.startedAt;
+          run.previousElapsed = 0;
+          overlay.hidden = true;
+          clearKeys(run);
+          setPhase("playing", "按住 ← / → 移動，接住掉落的寶物！");
+          $("collectClose").focus({ preventScroll: true });
+          run.endTimer = window.setTimeout(() => finish(run), DURATION);
+          run.frame = requestAnimationFrame((time) => tick(run, time));
+          run.restoreMapMusic = Boolean(backgroundMusicSource) || pendingMapMusicRestore;
+          pendingMapMusicRestore = false;
+          stopBackgroundMusic();
+          prepareCollectAudio(run);
+        }
+        opener.addEventListener("click", openCollect);
+        $("collectEasy").addEventListener("click", () => { if (phase === "difficulty") void loadRider(session); });
+        start.addEventListener("click", () => { if (phase === "error") void loadRider(session); else if (phase === "preview") begin(session); });
+        rewardButton.addEventListener("click", () => claimCollectReward(session));
+        $("collectClose").addEventListener("click", closeCollect);
+        dialog.addEventListener("cancel", (event) => { event.preventDefault(); closeCollect(); });
+        dialog.addEventListener("close", () => { if (!dialog.open && session) closeCollect(); });
+        document.addEventListener("keydown", (event) => {
+          if (!dialog.open) return;
+          if (["ArrowLeft", "ArrowRight"].includes(event.key)) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            if (phase === "playing" && !event.repeat) {
+              session.keys.delete(event.key);
+              session.keys.add(event.key);
+              pose(direction(session) < 0 ? "left" : "right");
+            }
+          } else if (event.key === "Escape") {
+            event.preventDefault(); event.stopImmediatePropagation(); closeCollect();
+          } else if (event.key === "Tab") {
+            const buttons = [...dialog.querySelectorAll("button:not(:disabled)")].filter((button) => button.getClientRects().length > 0);
+            const index = buttons.indexOf(document.activeElement);
+            const next = index < 0 ? (event.shiftKey ? buttons.length - 1 : 0) : (index + (event.shiftKey ? -1 : 1) + buttons.length) % buttons.length;
+            event.preventDefault(); buttons[next]?.focus({ preventScroll: true });
+          }
+        }, true);
+        document.addEventListener("keyup", (event) => {
+          if (!dialog.open || !["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+          event.preventDefault();
+          session.keys.delete(event.key);
+          const moving = direction(session);
+          pose(moving < 0 ? "left" : moving > 0 ? "right" : "rest");
+        });
+        window.addEventListener("blur", () => { if (session) clearKeys(session); });
+        document.addEventListener("visibilitychange", () => {
+          if (session) {
+            clearKeys(session);
+            if (document.hidden) stopCollectAudio(session);
+            else if (phase === "playing") {
+              if (performance.now() - session.startedAt >= DURATION) finish(session);
+              else prepareCollectAudio(session);
+            }
+          }
+          if (!document.hidden && phase !== "playing") restoreMapMusic(session);
+        });
       })();
 
       makeTiles();
