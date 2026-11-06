@@ -66,6 +66,7 @@
       font-size: 23px;
     }
     .brand-copy { min-width: 0; }
+    .brand-description { margin: 5px 0 0; color: #843e5c; font-size: 12px; font-weight: 800; line-height: 1.5; }
     .eyebrow {
       margin: 0 0 1px;
       color: var(--forest);
@@ -100,6 +101,18 @@
       padding-top: 21px;
     }
     .map-column { min-width: 0; }
+    .zodiac-marks { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 6px; margin-bottom: 11px; }
+    .zodiac-marks img { display: block; width: 100%; aspect-ratio: 1; object-fit: contain; filter: grayscale(1); }
+    .zodiac-marks img.is-earned { filter: none; }
+    .zodiac-marks.is-celebrating img { animation: badge-celebration 1s ease-in-out 2; }
+    @keyframes badge-celebration {
+      0%, 100% { opacity: 1; filter: drop-shadow(0 0 5px #d6a346); }
+      50% { opacity: .55; filter: drop-shadow(0 0 12px #e5ba61); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .zodiac-marks.is-celebrating img { animation: none !important; filter: drop-shadow(0 0 7px #d6a346); }
+    }
+    @media (max-width: 600px) { .zodiac-marks { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
     .map-heading {
       display: flex;
       flex-wrap: wrap;
@@ -143,6 +156,9 @@
     .map-image { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: fill; }
     .scene-art, .route-art { display: none; }
     .tile-layer { z-index: 2; }
+    .shop-open { position: absolute; z-index: 6; left: 86%; top: 36.5%; transform: translate(-50%, -50%); min-width: 66px; min-height: 44px; padding: 6px 8px; border: 2px solid #fff0bb; border-radius: 8px; color: #fff9e9; background: #805238; box-shadow: 0 3px 0 #553724, 0 5px 12px #41251655; font: inherit; font-size: clamp(10px, 1.4vw, 15px); font-weight: 900; white-space: nowrap; cursor: pointer; }
+    .shop-open:hover { background: #9b6845; }
+    .shop-open:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
     .route-shadow {
       fill: none;
       stroke: rgba(46, 69, 48, .30);
@@ -214,7 +230,7 @@
       font-size: 13px;
       line-height: 1;
     }
-    .tile[data-type="treasure"], .tile[data-type="item"], .tile[data-type="fate"], .tile[data-type="challenge"], .tile[data-type="coin"] { background: transparent; box-shadow: none; }
+    .tile[data-type="treasure"], .tile[data-type="fate"], .tile[data-type="coin"] { background: transparent; box-shadow: none; }
     .tile.start-tile, .tile.finish-tile { width: clamp(25px, 4.2vw, 32px); }
     .tile.current-stop { z-index: 4; filter: drop-shadow(0 0 5px #ed91b0); transform: translate(-50%, -50%) scale(1.2) rotate(var(--tilt, -3deg)); }
     .player-token {
@@ -249,10 +265,13 @@
     .progress-fill { width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #759469, #e0a1b5); transition: width .3s ease; }
     .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
     .stat { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .remote-dice-trigger { width: 100%; min-height: 44px; padding: 0; border: 0; border-radius: 9px; color: inherit; background: transparent; font: inherit; text-align: left; cursor: pointer; }
+    .remote-dice-trigger:disabled { cursor: default; }
     .stat-icon { font-size: 20px; }
     .stat-label { display: block; color: var(--muted); font-size: 10px; font-weight: 800; }
     .stat-value { display: block; font-size: 16px; font-weight: 900; font-variant-numeric: tabular-nums; }
-    .current-tile { display: flex; align-items: center; gap: 9px; min-height: 36px; margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--line); }
+    .current-row { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--line); }
+    .current-tile { display: flex; align-items: center; gap: 9px; min-width: 0; min-height: 36px; }
     .current-animal { font-size: 22px; }
     .current-copy { min-width: 0; }
     .current-copy small { display: block; color: var(--muted); font-size: 10px; font-weight: 700; }
@@ -376,10 +395,70 @@
     }
     .memory-dialog::backdrop { background: rgba(31, 24, 43, .7); }
     .memory-dialog [hidden] { display: none !important; }
+    .memory-close:disabled { opacity: .35; cursor: default; }
+    .memory-difficulty-button.is-played { filter: grayscale(1); opacity: .45; cursor: default; }
+    .played-label { display: block; margin-top: 5px; font-size: 12px; }
+    .board-challenge-note { margin: 12px 0; padding: 10px 12px; border: 1px solid var(--memory-border); border-radius: 12px; color: var(--memory-deep); background: var(--memory-soft); font-size: 13px; line-height: 1.5; }
+    .game-wheel-dialog { width: min(560px, calc(100% - 32px)); text-align: center; }
+    .game-wheel-wrap { position: relative; width: min(100%, 380px); margin: 24px auto 18px; }
+    .game-wheel-wrap::before { position: absolute; z-index: 2; top: -12px; left: calc(50% - 13px); border-left: 13px solid transparent; border-right: 13px solid transparent; border-top: 29px solid var(--memory-deep); content: ""; }
+    .game-wheel-disc { position: relative; aspect-ratio: 1; border: 8px solid var(--memory-deep); border-radius: 50%; box-shadow: 0 6px 0 var(--memory-border); }
+    .game-wheel-label { position: absolute; width: 30%; transform: translate(-50%, -50%); color: #39274d; font-size: clamp(10px, 2.8vw, 14px); font-weight: 900; line-height: 1.35; }
+    .game-wheel-label strong { display: block; margin-bottom: 3px; font-size: clamp(23px, 6vw, 35px); }
+    .game-wheel-center { position: absolute; top: 50%; left: 50%; display: grid; place-items: center; width: 22%; aspect-ratio: 1; transform: translate(-50%, -50%); border: 4px solid #fff; border-radius: 50%; background: var(--memory-deep); color: #fff; font-size: clamp(20px, 6vw, 32px); }
+    .game-wheel-result { margin: 0 0 16px; color: var(--memory-deep); font-weight: 900; line-height: 1.6; }
     .memory-header { display: flex; justify-content: space-between; align-items: start; gap: 10px; }
     .memory-kicker { margin: 0 0 4px; color: var(--memory-purple); font-size: 10px; font-weight: 900; letter-spacing: 1.5px; }
     .memory-title { margin: 0; color: var(--memory-deep); font-family: var(--serif); font-size: clamp(23px, 5vw, 30px); }
     .memory-close { flex: 0 0 40px; width: 40px; height: 40px; padding: 0; border: 1px solid var(--memory-border); border-radius: 50%; color: var(--memory-deep); background: var(--memory-soft); font-size: 26px; line-height: 1; cursor: pointer; }
+    .shop-dialog { --memory-purple: #977048; --memory-deep: #62452d; --memory-border: #dec49a; --memory-soft: #f5e7ca; width: min(600px, calc(100% - 32px)); background: #fffaf0; }
+    .shop-dialog .memory-close { flex-basis: 44px; width: 44px; height: 44px; }
+    .shop-scene-wrap { position: relative; margin-top: 16px; }
+    .shop-scene { display: block; width: 100%; height: auto; border: 2px solid #dec49a; border-radius: 18px; background: #f5e7ca; }
+    .shop-speech { position: relative; margin: 16px 0 0; padding: 15px 18px; border: 2px solid #dec49a; border-radius: 16px; background: #fffdf7; color: #62452d; }
+    .shop-speech::before { position: absolute; top: -9px; left: calc(50% - 7px); width: 14px; height: 14px; border-top: 2px solid #dec49a; border-left: 2px solid #dec49a; background: #fffdf7; transform: rotate(45deg); content: ""; }
+    .shop-speaker { display: block; margin-bottom: 5px; color: #977048; font-size: 12px; font-weight: 900; }
+    .shop-greeting { margin: 0; font-family: var(--serif); font-size: clamp(18px, 4vw, 24px); font-weight: 700; line-height: 1.5; }
+    .shop-balance { margin: 14px 0 10px; color: #795739; font-size: 13px; font-weight: 800; line-height: 1.6; }
+    .shop-products { position: absolute; inset: 0; pointer-events: none; }
+    .shop-product { position: absolute; top: 43%; width: 27%; transform: translateY(-50%); display: grid; justify-items: center; gap: clamp(2px, .8vw, 6px); min-width: 0; padding: clamp(4px, 1.2vw, 10px) 2px; border: 2px solid #dec49a; border-radius: 10px; color: #62452d; background: #fff6e3f5; pointer-events: auto; }
+    .shop-product:first-child { left: 4%; }
+    .shop-product:last-child { right: 4%; }
+    .shop-exchange { width: 100%; min-height: 44px; margin-top: 2px; padding: 4px 2px; border: 1px solid #b78b57; border-radius: 7px; color: #fffaf0; background: #795739; font: inherit; font-size: clamp(12px, 2.5vw, 16px); font-weight: 900; cursor: pointer; pointer-events: auto; }
+    .shop-exchange:not(:disabled):hover { background: #62452d; }
+    .shop-exchange:disabled { border-color: #b9b9b9; color: #737373; background: #e0e0e0; cursor: not-allowed; }
+    .shop-product-icon { font-size: clamp(22px, 5vw, 38px); line-height: 1.1; }
+    .shop-product-name { font-size: clamp(10px, 2.5vw, 18px); font-weight: 900; white-space: nowrap; }
+    .shop-product-price { font-size: clamp(9px, 2.2vw, 12px); font-weight: 800; white-space: nowrap; }
+    .shop-confirm { padding: 16px; border: 2px solid #dec49a; border-radius: 14px; color: #62452d; background: #f5e7ca; }
+    .shop-confirm p { margin: 0 0 14px; font-size: 16px; font-weight: 800; line-height: 1.6; }
+    .shop-confirm-actions { display: flex; gap: 10px; }
+    .shop-confirm-actions button { flex: 1; min-width: 0; min-height: 44px; padding: 8px; border: 1px solid #b78b57; border-radius: 9px; color: #62452d; background: #fffaf0; font: inherit; font-weight: 900; cursor: pointer; }
+    .shop-confirm-actions .shop-confirm-yes { color: #fffaf0; background: #795739; }
+    .shop-feedback { margin: 12px 0 0; color: #795739; font-size: 14px; font-weight: 800; line-height: 1.6; }
+    .shop-feedback:empty { display: none; }
+    .remote-dice-dialog { width: min(340px, calc(100% - 32px)); }
+    .remote-dice-dialog .memory-title { font-size: 24px; }
+    .remote-dice-dialog .memory-close { flex-basis: 44px; width: 44px; height: 44px; }
+    .remote-dice-form { margin-top: 18px; }
+    .remote-dice-choices { min-width: 0; margin: 0; padding: 0; border: 0; }
+    .remote-dice-choices legend { margin-bottom: 14px; color: var(--memory-deep); font-size: 13px; font-weight: 800; }
+    .remote-dice-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .remote-dice-choice { position: relative; min-width: 0; cursor: pointer; }
+    .remote-dice-choice input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+    .remote-dice-face { position: relative; display: block; min-height: 44px; aspect-ratio: 1; border: 2px solid var(--memory-border); border-radius: 15px; color: var(--memory-deep); background: #fffdf8; box-shadow: inset 0 -5px 0 #ede5df, 0 3px 0 var(--memory-border); pointer-events: none; }
+    .remote-dice-choice input:checked + .remote-dice-face { color: #fff; background: var(--memory-deep); border-color: var(--memory-deep); box-shadow: inset 0 -5px 0 #38234f, 0 3px 0 var(--memory-border); }
+    .remote-dice-choice input:hover + .remote-dice-face { border-color: var(--memory-deep); }
+    .remote-dice-choice input:focus-visible + .remote-dice-face { outline: 3px solid #d978b2; outline-offset: 3px; }
+    .dice-pip { position: absolute; width: 13%; height: 13%; border-radius: 50%; background: currentColor; transform: translate(-50%, -50%); }
+    .dice-pip.tl { left: 27%; top: 27%; } .dice-pip.tr { left: 73%; top: 27%; }
+    .dice-pip.ml { left: 27%; top: 50%; } .dice-pip.mr { left: 73%; top: 50%; }
+    .dice-pip.bl { left: 27%; top: 73%; } .dice-pip.br { left: 73%; top: 73%; }
+    .dice-pip.center { left: 50%; top: 50%; }
+    .remote-dice-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 18px; }
+    .remote-dice-actions output { color: var(--memory-deep); font-size: 14px; font-weight: 900; }
+    .remote-dice-actions button { min-width: 88px; min-height: 44px; padding: 8px 10px; border: 1px solid var(--memory-border); border-radius: 9px; color: #fff; background: var(--memory-deep); font: inherit; font-weight: 900; cursor: pointer; }
+    .remote-dice-actions button:disabled { opacity: .5; cursor: default; }
     .memory-status-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 52px; margin: 12px 0; }
     .memory-status { margin: 0; color: #73647f; font-size: 13px; }
     .memory-timer { flex: 0 0 auto; padding: 7px 11px; border-radius: 12px; color: var(--memory-deep); background: var(--memory-soft); font-size: 13px; font-weight: 800; white-space: nowrap; }
@@ -616,10 +695,13 @@
       .game-layout { grid-template-columns: 1fr; gap: 15px; padding-top: 16px; }
       .map-column { grid-row: 2; }
       .side-panel { position: static; grid-row: 1; gap: 10px; }
+      .game-layout.is-badge-celebrating .map-column { grid-row: 1; }
+      .game-layout.is-badge-celebrating .side-panel { grid-row: 2; }
       .status-block { padding: 11px 13px; }
       .status-top h2 { font-size: 16px; }
       .progress-track { height: 6px; margin: 8px 0; }
-      .current-tile { min-height: 30px; margin-top: 8px; padding-top: 7px; }
+      .current-row { margin-top: 8px; padding-top: 7px; }
+      .current-tile { min-height: 30px; }
       .action-box { position: fixed; z-index: 30; right: max(10px, env(safe-area-inset-right)); bottom: max(10px, env(safe-area-inset-bottom)); left: max(10px, env(safe-area-inset-left)); display: grid; grid-template-columns: 1fr minmax(145px, .75fr); align-items: center; gap: 10px; padding: 9px 10px; border: 1px solid rgba(255,255,255,.22); border-radius: 4px 15px 4px 15px; box-shadow: 0 8px 22px rgba(26, 48, 39, .28); }
       .action-heading { grid-column: 1; margin: 0; }
       .action-heading h2 { font-size: 14px; }
@@ -653,6 +735,7 @@
         <div class="brand-copy">
           <p class="eyebrow">Claire's birthday quest game</p>
           <h1>Claire 的星願森林</h1>
+          <p class="brand-description">湊齊12生肖勇氣徽章換取大獎！</p>
         </div>
       </div>
       <div class="birthday-tag">只為 Claire 準備</div>
@@ -660,6 +743,20 @@
 
     <main class="game-layout">
       <section class="map-column" aria-label="生肖森林石板路">
+        <div class="zodiac-marks" role="group" aria-label="十二生肖勇氣徽章">
+          <img src="mark12/mark1.png" alt="鼠" draggable="false">
+          <img src="mark12/mark2.png" alt="牛" draggable="false">
+          <img src="mark12/mark3.png" alt="虎" draggable="false">
+          <img src="mark12/mark4.png" alt="兔" draggable="false">
+          <img src="mark12/mark5.png" alt="龍" draggable="false">
+          <img src="mark12/mark6.png" alt="蛇" draggable="false">
+          <img src="mark12/mark7.png" alt="馬" draggable="false">
+          <img src="mark12/mark8.png" alt="羊" draggable="false">
+          <img src="mark12/mark9.png" alt="猴" draggable="false">
+          <img src="mark12/mark10.png" alt="雞" draggable="false">
+          <img src="mark12/mark11.png" alt="狗" draggable="false">
+          <img src="mark12/mark12.png" alt="豬" draggable="false">
+        </div>
         <div class="map-heading" role="group" aria-label="開發用小遊戲按鈕">
           <button class="dev-game-button" type="button" data-minigame="1">小遊戲1</button>
           <button class="dev-game-button" type="button" data-minigame="2">小遊戲2</button>
@@ -755,6 +852,7 @@
             <path id="routeRibbon" class="route-ribbon" />
             <path id="routeDash" class="route-dash" />
           </svg>
+          <button class="shop-open" id="shopOpen" type="button" aria-haspopup="dialog" aria-controls="shopDialog">兌換商店</button>
           <div class="tile-layer" id="tileLayer" aria-label="生肖棋格"></div>
           <div class="player-token" id="playerToken" aria-label="Claire 的酷洛米棋子"><img src="./pic/Screenshot%202026-10-30%20at%2011.14.18%E2%80%AFPM.png" alt="酷洛米"></div>
         </div>
@@ -774,7 +872,10 @@
             <div class="stat"><span class="stat-icon" aria-hidden="true">🪙</span><span><span class="stat-label">森林金幣</span><span class="stat-value" id="coinCount">0</span></span></div>
             <div class="stat"><span class="stat-icon" aria-hidden="true">🎁</span><span><span class="stat-label">戳戳樂</span><span class="stat-value" id="prizeState">0 次</span></span></div>
           </div>
-          <div class="current-tile"><span class="current-animal" id="currentAnimal">🐴</span><span class="current-copy"><small id="currentLabel">目前位置</small><strong id="currentName">森林起點</strong></span></div>
+          <div class="current-row">
+            <div class="current-tile"><span class="current-animal" id="currentAnimal">🐴</span><span class="current-copy"><small id="currentLabel">目前位置</small><strong id="currentName">森林起點</strong></span></div>
+            <button class="stat remote-dice-trigger" id="remoteDiceOpen" type="button" aria-haspopup="dialog" aria-controls="remoteDiceDialog" disabled><span class="stat-icon" aria-hidden="true">🎲</span><span><span class="stat-label">遙控骰子</span><span class="stat-value" id="remoteDiceCount">0 個</span></span></button>
+          </div>
         </section>
 
         <section class="action-box" aria-label="擲骰操作">
@@ -808,6 +909,18 @@
       <button class="modal-action" id="modalAction" type="button">繼續旅程</button>
     </div>
   </div>
+
+  <dialog class="memory-dialog game-wheel-dialog" id="gameWheelDialog" aria-labelledby="gameWheelTitle">
+    <p class="memory-kicker">ZODIAC COURAGE CHALLENGE</p>
+    <h2 class="memory-title" id="gameWheelTitle">勇氣小遊戲轉盤</h2>
+    <p class="board-challenge-note" id="gameWheelLanding"></p>
+    <div class="game-wheel-wrap" aria-hidden="true">
+      <div class="game-wheel-disc" id="gameWheelDisc"></div>
+      <span class="game-wheel-center">🎮</span>
+    </div>
+    <p class="game-wheel-result" id="gameWheelResult" role="status">轉盤轉動中…</p>
+    <button class="memory-action" id="gameWheelContinue" type="button" disabled>轉盤轉動中…</button>
+  </dialog>
 
   <dialog class="memory-dialog" id="memoryDialog" aria-labelledby="memoryTitle" aria-describedby="memoryStatus">
     <header class="memory-header">
@@ -997,6 +1110,123 @@
     </section>
   </dialog>
 
+  <dialog class="memory-dialog shop-dialog" id="shopDialog" aria-labelledby="shopTitle" aria-describedby="shopGreeting">
+    <header class="memory-header">
+      <div>
+        <p class="memory-kicker">FOREST GIFT SHOP</p>
+        <h2 class="memory-title" id="shopTitle">兌換商店</h2>
+      </div>
+      <button class="memory-close" id="shopClose" type="button" aria-label="關閉兌換商店">×</button>
+    </header>
+    <div class="shop-scene-wrap">
+    <svg class="shop-scene" viewBox="0 0 560 350" role="img" aria-labelledby="shopSceneTitle">
+      <title id="shopSceneTitle">溫暖的商店內部：禮物貨架、木頭櫃台，以及微笑迎接小朋友的商店老闆。</title>
+      <defs>
+        <linearGradient id="shopWall" x2="0" y2="1"><stop stop-color="#fff2d7"/><stop offset="1" stop-color="#ead2a7"/></linearGradient>
+        <linearGradient id="shopCounter" x2="0" y2="1"><stop stop-color="#bb865b"/><stop offset="1" stop-color="#956341"/></linearGradient>
+        <g id="shopGift"><rect x="-18" y="-15" width="36" height="30" rx="3" fill="currentColor"/><rect x="-3" y="-15" width="6" height="30" fill="#ffe9aa"/><rect x="-20" y="-17" width="40" height="7" rx="2" fill="currentColor"/><path d="M0-17C-22-18-18-34-7-28L0-17C22-18 18-34 7-28Z" fill="none" stroke="#ffe9aa" stroke-width="4" stroke-linejoin="round"/></g>
+      </defs>
+      <rect width="560" height="350" fill="url(#shopWall)"/>
+      <path d="M0 266H560V350H0Z" fill="#cfab7c"/>
+      <path d="M0 294H560M0 325H560M80 266L45 350M180 266L165 350M380 266L395 350M480 266L515 350" fill="none" stroke="#b68c61" stroke-width="2"/>
+      <path d="M0 0H560V24H0Z" fill="#a47750"/><path d="M0 24H560" stroke="#d0a373" stroke-width="6"/>
+      <rect x="213" y="40" width="134" height="110" rx="45" fill="#bc9160"/>
+      <rect x="221" y="48" width="118" height="95" rx="38" fill="#bee1ce"/>
+      <path d="M280 48V143M221 97H339" stroke="#fff1d2" stroke-width="6"/>
+      <path d="M240 115Q250 79 268 103Q287 57 311 94L334 136H224Z" fill="#82b59b"/>
+      <path d="M206 48Q230 28 250 46L236 145H205Z M354 48Q330 28 310 46L324 145H355Z" fill="#e6a7aa"/>
+      <path d="M212 91L237 99M348 91L323 99" stroke="#ffe9aa" stroke-width="6"/>
+      <g fill="#a77750" stroke="#795236" stroke-width="3">
+        <rect x="26" y="69" width="143" height="178" rx="6"/>
+        <rect x="391" y="69" width="143" height="178" rx="6"/>
+      </g>
+      <g fill="#f5deba"><rect x="34" y="78" width="127" height="67"/><rect x="34" y="155" width="127" height="78"/><rect x="399" y="78" width="127" height="67"/><rect x="399" y="155" width="127" height="78"/></g>
+      <use href="#shopGift" x="62" y="124" color="#bfa0d0"/><use href="#shopGift" x="121" y="124" color="#db8e9d"/>
+      <use href="#shopGift" x="431" y="124" color="#82b9ae"/><use href="#shopGift" x="494" y="124" color="#d9ac5f"/>
+      <g fill="#eed19b" stroke="#a77750" stroke-width="3"><circle cx="64" cy="199" r="22"/><circle cx="124" cy="199" r="22"/></g>
+      <path d="M64 183L68 194L80 194L70 202L74 214L64 207L54 214L58 202L48 194L60 194Z" fill="#bc9250"/>
+      <path d="M124 185L135 193L135 207L124 215L113 207L113 193Z" fill="#bc9250"/>
+      <g stroke="#795236" stroke-width="2"><rect x="409" y="174" width="22" height="57" rx="2" fill="#c4a1d5"/><rect x="437" y="169" width="18" height="62" rx="2" fill="#91b9a4"/><rect x="462" y="179" width="21" height="52" rx="2" fill="#dfaaa0"/><rect x="490" y="172" width="22" height="59" rx="2" fill="#d5b571"/></g>
+      <g stroke="#694536" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M234 204Q225 236 211 253H349Q335 234 327 204" fill="#91b6a0" stroke-width="4"/>
+        <path d="M250 205L246 248H315L310 205" fill="#f5e3bc" stroke-width="3"/>
+        <path d="M229 229Q206 208 198 220Q197 231 229 246M332 229Q354 207 364 220Q365 232 332 246" fill="#f6c6a1" stroke-width="3"/>
+        <ellipse cx="226" cy="169" rx="10" ry="15" fill="#f6c6a1" stroke-width="3"/>
+        <ellipse cx="333" cy="169" rx="10" ry="15" fill="#f6c6a1" stroke-width="3"/>
+        <path d="M228 154Q220 111 262 108Q311 88 331 126L333 164" fill="#785345" stroke-width="4"/>
+        <path d="M230 149Q231 211 280 215Q329 211 330 148Q308 150 296 125Q281 148 230 149Z" fill="#f6c6a1" stroke-width="3"/>
+        <path d="M244 161Q251 157 259 160M298 160Q307 157 316 161" fill="none" stroke-width="3"/>
+        <g fill="none" stroke-width="3"><circle cx="254" cy="173" r="12"/><circle cx="307" cy="173" r="12"/><path d="M266 172Q280 167 295 172M242 171L228 167M319 171L333 167"/></g>
+        <path d="M250 174Q254 169 258 174M303 174Q307 169 311 174" fill="none" stroke-width="2"/>
+        <path d="M268 192Q280 205 293 192" fill="#fff5e6" stroke-width="2"/>
+        <path d="M277 179L275 186H282" fill="none" stroke-width="2"/>
+      </g>
+      <g fill="#e8988d" opacity=".65"><ellipse cx="244" cy="189" rx="8" ry="4"/><ellipse cx="316" cy="189" rx="8" ry="4"/></g>
+      <rect x="166" y="241" width="228" height="87" rx="9" fill="url(#shopCounter)" stroke="#795236" stroke-width="3"/>
+      <rect x="155" y="236" width="250" height="15" rx="5" fill="#dfb987" stroke="#795236" stroke-width="3"/>
+      <rect x="183" y="266" width="194" height="44" rx="6" fill="#ac7750" stroke="#d4a673" stroke-width="2"/>
+      <path d="M280 275L284 284L295 285L287 292L289 302L280 297L271 302L273 292L265 285L276 284Z" fill="#f4dc9a"/>
+      <use href="#shopGift" x="194" y="219" color="#bca0d0"/>
+      <g fill="#88ad8e"><path d="M373 231Q348 204 361 194Q378 190 373 231Z"/><path d="M373 231Q398 202 388 194Q370 191 373 231Z"/></g>
+      <path d="M360 219H385L380 236H365Z" fill="#e8b193"/>
+      <path d="M95 25V42M465 25V42" stroke="#795236" stroke-width="3"/>
+      <path d="M78 57Q95 23 112 57Z M448 57Q465 23 482 57Z" fill="#daab60"/>
+      <g fill="#fff5c7"><ellipse cx="95" cy="58" rx="17" ry="5"/><ellipse cx="465" cy="58" rx="17" ry="5"/></g>
+    </svg>
+    <div class="shop-products" id="shopProducts" role="group" aria-label="可兌換商品">
+      <div class="shop-product">
+        <span class="shop-product-icon" aria-hidden="true">🎲</span>
+        <span class="shop-product-name">遙控骰子</span>
+        <span class="shop-product-price">8 點金幣／個</span>
+        <button class="shop-exchange" id="shopRemoteDice" type="button" data-shop-product="remoteDice" aria-label="兌換遙控骰子，8點金幣">兌換</button>
+      </div>
+      <div class="shop-product">
+        <span class="shop-product-icon" aria-hidden="true">🎁</span>
+        <span class="shop-product-name">戳戳樂</span>
+        <span class="shop-product-price">10 點金幣／個</span>
+        <button class="shop-exchange" id="shopPoke" type="button" data-shop-product="poke" aria-label="兌換戳戳樂，10點金幣">兌換</button>
+      </div>
+    </div>
+    </div>
+    <div class="shop-speech">
+      <span class="shop-speaker">商店老闆</span>
+      <p class="shop-greeting" id="shopGreeting">小朋友，想要兌換什麼？</p>
+    </div>
+    <p class="shop-balance" id="shopBalance"></p>
+    <section class="shop-confirm" id="shopConfirm" aria-labelledby="shopConfirmText" hidden>
+      <p id="shopConfirmText"></p>
+      <div class="shop-confirm-actions">
+        <button id="shopCancel" type="button">取消</button>
+        <button class="shop-confirm-yes" id="shopConfirmYes" type="button" disabled>確定</button>
+      </div>
+    </section>
+    <p class="shop-feedback" id="shopFeedback" role="status"></p>
+  </dialog>
+
+  <dialog class="memory-dialog remote-dice-dialog" id="remoteDiceDialog" aria-labelledby="remoteDiceTitle">
+    <header class="memory-header">
+      <h2 class="memory-title" id="remoteDiceTitle">🎲 遙控骰子</h2>
+      <button class="memory-close" id="remoteDiceClose" type="button" aria-label="關閉遙控骰子">×</button>
+    </header>
+    <form class="remote-dice-form" id="remoteDiceForm">
+      <fieldset class="remote-dice-choices" id="remoteDiceSteps">
+        <legend>點選骰子步數（使用 1 個遙控骰子）</legend>
+        <div class="remote-dice-grid">
+          <label class="remote-dice-choice"><input type="radio" name="steps" value="1" aria-label="1 點，前進 1 步" checked><span class="remote-dice-face" aria-hidden="true"><i class="dice-pip center"></i></span></label>
+          <label class="remote-dice-choice"><input type="radio" name="steps" value="2" aria-label="2 點，前進 2 步"><span class="remote-dice-face" aria-hidden="true"><i class="dice-pip tl"></i><i class="dice-pip br"></i></span></label>
+          <label class="remote-dice-choice"><input type="radio" name="steps" value="3" aria-label="3 點，前進 3 步"><span class="remote-dice-face" aria-hidden="true"><i class="dice-pip tl"></i><i class="dice-pip center"></i><i class="dice-pip br"></i></span></label>
+          <label class="remote-dice-choice"><input type="radio" name="steps" value="4" aria-label="4 點，前進 4 步"><span class="remote-dice-face" aria-hidden="true"><i class="dice-pip tl"></i><i class="dice-pip tr"></i><i class="dice-pip bl"></i><i class="dice-pip br"></i></span></label>
+          <label class="remote-dice-choice"><input type="radio" name="steps" value="5" aria-label="5 點，前進 5 步"><span class="remote-dice-face" aria-hidden="true"><i class="dice-pip tl"></i><i class="dice-pip tr"></i><i class="dice-pip center"></i><i class="dice-pip bl"></i><i class="dice-pip br"></i></span></label>
+          <label class="remote-dice-choice"><input type="radio" name="steps" value="6" aria-label="6 點，前進 6 步"><span class="remote-dice-face" aria-hidden="true"><i class="dice-pip tl"></i><i class="dice-pip tr"></i><i class="dice-pip ml"></i><i class="dice-pip mr"></i><i class="dice-pip bl"></i><i class="dice-pip br"></i></span></label>
+        </div>
+      </fieldset>
+      <div class="remote-dice-actions">
+        <output id="remoteDiceSelection" aria-live="polite">前進 1 步</output>
+        <button id="remoteDiceGo" type="submit">GO!</button>
+      </div>
+    </form>
+  </dialog>
+
   <script>
     (() => {
       "use strict";
@@ -1014,6 +1244,7 @@
       ];
       const SPACE_COUNT = ROUTE_POINTS.length;
       const FINISH_INDEX = SPACE_COUNT - 1;
+      const SHOW_TILE_ANIMALS = true; // 改成 false 隱藏石階上的動物，保留事件圖示。
       const ZODIAC = [
         { name: "鼠", emoji: "🐭" }, { name: "牛", emoji: "🐮" },
         { name: "虎", emoji: "🐯" }, { name: "兔", emoji: "🐰" },
@@ -1025,9 +1256,9 @@
       const EVENT_LAYOUT = (() => {
         const layout = { 0: "start", [FINISH_INDEX]: "finish" };
         const events = [
-          [.12, "coin"], [.18, "challenge"], [.25, "item"], [.32, "treasure"],
-          [.39, "fate"], [.45, "coin"], [.52, "challenge"], [.59, "treasure"],
-          [.66, "item"], [.73, "fate"], [.80, "coin"], [.86, "challenge"],
+          [.12, "coin"], [.32, "treasure"],
+          [.39, "fate"], [.45, "coin"], [.59, "treasure"],
+          [.73, "fate"], [.80, "coin"],
           [.93, "treasure"], [.98, "fate"],
         ];
         for (const [progress, type] of events) {
@@ -1040,9 +1271,7 @@
         start: { icon: "🏁", label: "起點", name: "森林起點" },
         coin: { icon: "🪙", label: "金幣", name: "金幣小徑" },
         treasure: { icon: "💎", label: "寶藏", name: "森林寶藏" },
-        item: { icon: "🧿", label: "道具", name: "幸運道具" },
         fate: { icon: "🎡", label: "命運", name: "命運轉盤" },
-        challenge: { icon: "🏓", label: "挑戰", name: "球拍亭挑戰" },
         finish: { icon: "🏆", label: "終點", name: "星願終點" },
         normal: { icon: "", label: "生肖", name: "生肖花徑" },
       };
@@ -1056,6 +1285,9 @@
         position: 0,
         coins: 0,
         pokeChances: 0,
+        remoteDice: 0,
+        courageBadges: new Set(),
+        badgeCelebrated: false,
         inventory: [],
         started: false,
         busy: false,
@@ -1075,6 +1307,286 @@
       const modalPanel = $("modalPanel");
       const modalAction = $("modalAction");
       const tiles = [];
+      let badgeCelebrationTimer = null;
+      const boardGames = new Map();
+      const usedGameModes = new Set();
+      const closingGames = new Map();
+      let pendingBoardChallenge = null;
+      let challengeGeneration = 0;
+      let wheelAnimation = null;
+      let wheelTimer = null;
+      let wheelOverflow = "";
+      let wheelNext = null;
+
+      const currentChallenge = (context) => Boolean(context && context === pendingBoardChallenge && context.generation === challengeGeneration);
+      const boardRunActive = (run) => currentChallenge(run?.boardContext) && run.boardContext.run === run;
+      const gameModeUsed = (id, mode) => usedGameModes.has(`${id}:${mode}`);
+      function availableBoardGames() {
+        return [...boardGames.values()].filter((game) => game.modes.some((mode) => !gameModeUsed(game.id, mode)));
+      }
+      function canOpenGame(id, context) {
+        if (closingGames.has(id) || document.querySelector("dialog[open]") || !modal.hidden) return false;
+        return context ? currentChallenge(context) && context.gameId === id && !context.completed && !context.run
+          : !state.busy && !pendingBoardChallenge;
+      }
+      function attachBoardRun(run, id, context) {
+        run.boardContext = context;
+        run.gameId = id;
+        run.modeKey = null;
+        const dialog = boardGames.get(id).dialog;
+        let note = dialog.querySelector(".board-challenge-note");
+        if (!note) {
+          note = document.createElement("p");
+          note.className = "board-challenge-note";
+          note.setAttribute("role", "status");
+          dialog.querySelector("header").after(note);
+        }
+        note.hidden = !context;
+        if (context) {
+          context.run = run;
+          context.phase = "difficulty";
+          note.textContent = `第 ${context.position + 1} 格 · ${context.animal.name}生肖挑戰。開始後須完成並領取獎勵，才可繼續旅程。`;
+        }
+      }
+      function refreshGameControls(run, buttons, phase, modeAttribute, close) {
+        buttons.forEach((button) => {
+          const used = Boolean(run?.boardContext && gameModeUsed(run.gameId, button.dataset[modeAttribute]));
+          button.disabled = phase !== "difficulty" || used;
+          button.classList.toggle("is-played", used);
+          let label = button.querySelector(".played-label");
+          if (!label) {
+            label = document.createElement("small");
+            label.className = "played-label";
+            label.textContent = "已玩";
+            button.appendChild(label);
+          }
+          label.hidden = !used;
+        });
+        close.hidden = Boolean(boardRunActive(run) && (!run.boardContext.completed || !run.boardContext.rewardDone));
+        close.disabled = close.hidden;
+      }
+      function chooseBoardMode(run, mode) {
+        if (!run.boardContext) { run.modeKey = mode; return true; }
+        if (!boardRunActive(run) || run.boardContext.started || run.boardContext.completed || gameModeUsed(run.gameId, mode)) return false;
+        run.modeKey = mode;
+        run.boardContext.mode = mode;
+        return true;
+      }
+      function startBoardGame(run) {
+        if (!run?.boardContext) return true;
+        if (!boardRunActive(run) || !run.modeKey || gameModeUsed(run.gameId, run.modeKey) || run.boardContext.started || run.boardContext.completed) return false;
+        run.boardContext.started = true;
+        run.boardContext.phase = "running";
+        return true;
+      }
+      function finishBoardGame(run, noOriginalReward = false) {
+        if (!boardRunActive(run)) return;
+        const context = run.boardContext;
+        if (!context.started || context.completed || !run.modeKey) return;
+        context.completed = true;
+        context.phase = "result";
+        context.rewardDone = noOriginalReward;
+        usedGameModes.add(`${run.gameId}:${run.modeKey}`);
+        context.rewardText = grantZodiacReward(context.animal);
+        boardGames.get(run.gameId).dialog.querySelector(".board-challenge-note").textContent = context.rewardText;
+        updateToken();
+      }
+      function grantZodiacReward(animal) {
+        let text;
+        if (state.courageBadges.has(animal.name)) {
+          state.coins += 3;
+          text = `已擁有${animal.name}生肖勇氣徽章，額外獲得 3 枚森林金幣！`;
+        } else {
+          state.courageBadges.add(animal.name);
+          text = `獲得${animal.name}生肖勇氣徽章！`;
+        }
+        addLog(animal.emoji, text);
+        return text;
+      }
+      function originalRewardGranted(run) {
+        if (boardRunActive(run) && run.boardContext.completed) run.boardContext.rewardDone = true;
+      }
+      function focusGameControl(id) {
+        const dialog = boardGames.get(id).dialog;
+        const close = dialog.querySelector(".memory-close");
+        if (!close.disabled) close.focus({ preventScroll: true });
+        else {
+          dialog.tabIndex = -1;
+          dialog.focus({ preventScroll: true });
+        }
+      }
+      function prepareGameClose(run, retry = false) {
+        if (!run) return true;
+        const context = run.boardContext;
+        const recovering = retry === true || retry === "pause";
+        if (boardRunActive(run) && !recovering && (!context.completed || !context.rewardDone)) return false;
+        if (recovering && boardRunActive(run)) {
+          if (context.completed) return false;
+          context.started = false;
+        }
+        closingGames.set(run.gameId, { context, retry: retry === true });
+        return true;
+      }
+      function closeGameDialog(id, overflow, boardContext, opener) {
+        const dialog = boardGames.get(id).dialog;
+        const wasOpen = dialog.open;
+        document.body.style.overflow = overflow;
+        dialog.close();
+        if (!wasOpen) gameClosed(id);
+        if (!boardContext) opener.focus({ preventScroll: true });
+      }
+      function onGameDialogClose(id, run, close) {
+        const dialog = boardGames.get(id).dialog;
+        if (dialog.open) return;
+        if (boardRunActive(run) && (!run.boardContext.completed || !run.boardContext.rewardDone)) {
+          dialog.showModal();
+          focusGameControl(id);
+          return;
+        }
+        if (run) close();
+        gameClosed(id);
+      }
+      function gameClosed(id) {
+        const closing = closingGames.get(id);
+        if (!closing) return;
+        closingGames.delete(id);
+        const context = closing.context;
+        if (!currentChallenge(context)) return;
+        context.run = null;
+        if (context.completed) {
+          pendingBoardChallenge = null;
+          state.busy = false;
+        } else {
+          context.phase = "paused";
+          state.busy = true;
+        }
+        updateToken();
+        if (closing.retry) resumeBoardChallenge();
+        else if (modal.hidden && !document.querySelector("dialog[open]")) actionButton.focus({ preventScroll: true });
+      }
+      function openBoardGame(context) {
+        if (!currentChallenge(context)) return;
+        try {
+          boardGames.get(context.gameId).open(context);
+          if (!boardGames.get(context.gameId).dialog.open) throw new Error("Challenge dialog did not open");
+        } catch (error) {
+          console.error("Board challenge:", error);
+          const game = boardGames.get(context.gameId);
+          game.close("pause");
+          if (!game.dialog.open && !closingGames.has(context.gameId)) {
+            context.run = null;
+            context.phase = "paused";
+            updateToken();
+          }
+        }
+      }
+      function resumeBoardChallenge() {
+        const context = pendingBoardChallenge;
+        if (!currentChallenge(context) || context.run || document.querySelector("dialog[open]") || !modal.hidden) return;
+        state.busy = true;
+        context.phase = "opening";
+        updateToken();
+        openBoardGame(context);
+      }
+      async function startBoardChallenge(landed) {
+        const games = availableBoardGames();
+        if (!games.length) {
+          addLog("🎮", "小遊戲的所有難度已完成，一般格不再提供挑戰獎勵。");
+          state.busy = false;
+          updateToken();
+          return;
+        }
+        const selected = Math.floor(Math.random() * games.length);
+        const game = games[selected];
+        const context = { generation: challengeGeneration, position: state.position, animal: { ...landed.animal }, gameId: game.id, mode: null, run: null, phase: "spinning", started: false, completed: false, rewardDone: false };
+        pendingBoardChallenge = context;
+        state.busy = true;
+        updateToken();
+        const dialog = $("gameWheelDialog");
+        const disc = $("gameWheelDisc");
+        const colors = ["#e8d7f5", "#f7d8e5", "#f8e3ad", "#d5ebdf", "#d8e7f6"];
+        const slice = 360 / games.length;
+        disc.style.background = `conic-gradient(${games.map((entry, index) => `${colors[index]} ${index * slice}deg ${(index + 1) * slice}deg`).join(",")})`;
+        disc.replaceChildren();
+        games.forEach((entry, index) => {
+          const angle = (index + .5) * slice * Math.PI / 180;
+          const label = document.createElement("span");
+          label.className = "game-wheel-label";
+          label.style.left = `${50 + Math.sin(angle) * 33}%`;
+          label.style.top = `${50 - Math.cos(angle) * 33}%`;
+          const icon = document.createElement("strong");
+          icon.textContent = entry.icon;
+          label.append(icon, document.createTextNode(entry.name));
+          disc.appendChild(label);
+        });
+        $("gameWheelLanding").textContent = `第 ${context.position + 1} 格 · ${context.animal.emoji} ${context.animal.name}生肖。完成小遊戲即可獲得對應徽章；已獲得則加 3 枚金幣。`;
+        $("gameWheelResult").textContent = "轉盤轉動中…";
+        $("gameWheelContinue").textContent = "轉盤轉動中…";
+        $("gameWheelContinue").disabled = true;
+        wheelOverflow = document.body.style.overflow;
+        wheelNext = null;
+        try {
+          dialog.showModal();
+          document.body.style.overflow = "hidden";
+          dialog.tabIndex = -1;
+          dialog.focus({ preventScroll: true });
+          const angle = 1800 + 360 - (selected + .5) * slice;
+          disc.style.transform = `rotate(${angle}deg)`;
+          if (reducedMotion.matches) await new Promise((resolve) => { wheelTimer = window.setTimeout(resolve, 300); });
+          else {
+            wheelAnimation = disc.animate([{ transform: "rotate(0deg)" }, { transform: `rotate(${angle}deg)` }], { duration: 4000, easing: "cubic-bezier(.12,.72,.15,1)" });
+            await wheelAnimation.finished;
+          }
+          if (!currentChallenge(context) || !dialog.open) return;
+          wheelAnimation = null;
+          wheelTimer = null;
+          disc.querySelectorAll(".game-wheel-label").forEach((label) => { label.style.transform = `translate(-50%, -50%) rotate(${-angle}deg)`; });
+          context.phase = "wheel-ready";
+          $("gameWheelResult").textContent = `抽中：${game.name}！`;
+          $("gameWheelContinue").disabled = false;
+          $("gameWheelContinue").textContent = "選擇難度";
+          $("gameWheelContinue").focus({ preventScroll: true });
+        } catch {
+          if (!currentChallenge(context)) return;
+          wheelNext = context;
+          if (dialog.open) dialog.close();
+          else { document.body.style.overflow = wheelOverflow; context.phase = "paused"; updateToken(); }
+        }
+      }
+      $("gameWheelContinue").addEventListener("click", () => {
+        if (!$("gameWheelDialog").open || pendingBoardChallenge?.phase !== "wheel-ready") return;
+        wheelNext = pendingBoardChallenge;
+        $("gameWheelContinue").disabled = true;
+        $("gameWheelDialog").close();
+      });
+      $("gameWheelDialog").addEventListener("cancel", (event) => event.preventDefault());
+      $("gameWheelDialog").addEventListener("close", () => {
+        if ($("gameWheelDialog").open) return;
+        document.body.style.overflow = wheelOverflow;
+        const context = wheelNext;
+        wheelNext = null;
+        if (currentChallenge(context)) openBoardGame(context);
+        else if (currentChallenge(pendingBoardChallenge) && ["spinning", "wheel-ready"].includes(pendingBoardChallenge.phase)) {
+          pendingBoardChallenge.phase = "paused";
+          wheelAnimation?.cancel();
+          wheelAnimation = null;
+          window.clearTimeout(wheelTimer);
+          wheelTimer = null;
+          updateToken();
+        }
+      });
+      function resetBoardChallenges() {
+        challengeGeneration++;
+        pendingBoardChallenge = null;
+        usedGameModes.clear();
+        window.clearTimeout(wheelTimer);
+        wheelTimer = null;
+        wheelAnimation?.cancel();
+        wheelAnimation = null;
+        wheelNext = null;
+        if ($("gameWheelDialog").open) $("gameWheelDialog").close();
+        boardGames.forEach((game) => { if (game.dialog.open) game.close(true); });
+      }
 
       function routePosition(index) {
         const [x, y] = ROUTE_POINTS[index];
@@ -1108,7 +1620,7 @@
           tile.style.setProperty("--tilt", `${((index % 5) - 2) * 1.4}deg`);
           if (event === "start") tile.classList.add("start-tile");
           if (event === "finish") tile.classList.add("finish-tile");
-          tile.innerHTML = `<span class="tile-animal" aria-hidden="true">${animal.emoji}</span><span class="tile-number">${index + 1}</span>${event !== "normal" ? `<span class="tile-mark" aria-hidden="true">${EVENT_INFO[event].icon}</span>` : ""}`;
+          tile.innerHTML = `${SHOW_TILE_ANIMALS ? `<span class="tile-animal" aria-hidden="true">${animal.emoji}</span>` : ""}<span class="tile-number">${index + 1}</span>${event !== "normal" ? `<span class="tile-mark" aria-hidden="true">${EVENT_INFO[event].icon}</span>` : ""}`;
           tileLayer.appendChild(tile);
           tiles.push({ element: tile, animal, event, point, index });
         }
@@ -1130,6 +1642,14 @@
         $("progressTrack").setAttribute("aria-valuemax", String(FINISH_INDEX));
         $("coinCount").textContent = String(state.coins);
         $("prizeState").textContent = `${state.pokeChances} 次`;
+        $("remoteDiceCount").textContent = `${state.remoteDice} 個`;
+        $("remoteDiceOpen").disabled = state.remoteDice < 1 || state.busy || state.gameOver;
+        document.querySelectorAll(".zodiac-marks img").forEach((image, index) => {
+          const name = ZODIAC[index].name;
+          const earned = state.courageBadges.has(name);
+          image.classList.toggle("is-earned", earned);
+          image.alt = `${name}生肖勇氣徽章（${earned ? "已獲得" : "尚未獲得"}）`;
+        });
         $("currentAnimal").textContent = state.position === 0 ? "🐴" : current.animal.emoji;
         $("currentLabel").textContent = `第 ${state.position + 1} 格 · ${current.animal.name}生肖`;
         $("currentName").textContent = EVENT_INFO[current.event].name;
@@ -1138,8 +1658,13 @@
         $("actionCopy").textContent = state.gameOver
           ? "森林記住了你的勇氣與好運。"
           : state.busy ? "酷洛米正沿著石板路前進……" : state.started ? "每次擲骰前進，看看森林為你準備了什麼。" : "擲出第一顆骰子，開啟你的生日旅程。";
-        $("actionLabel").textContent = state.started ? (state.gameOver ? "再玩一次" : "擲骰前進") : "開始冒險";
-        actionButton.disabled = state.busy;
+        const resumable = pendingBoardChallenge?.phase === "paused" && !document.querySelector("dialog[open]");
+        $("actionLabel").textContent = resumable ? "繼續挑戰" : state.started ? (state.gameOver ? "再玩一次" : "擲骰前進") : "開始冒險";
+        if (pendingBoardChallenge) {
+          $("actionHeading").textContent = "生肖勇氣挑戰";
+          $("actionCopy").textContent = resumable ? "繼續剛才抽中的小遊戲，完成後再出發。" : "完成這局小遊戲，收下落點生肖的勇氣獎勵！";
+        }
+        actionButton.disabled = state.busy && !resumable;
         $("devMoveSteps").disabled = state.busy || state.gameOver;
         $("devMoveGo").disabled = state.busy || state.gameOver;
       }
@@ -1156,14 +1681,15 @@
       function renderInventory() {
         const inventory = $("inventory");
         inventory.replaceChildren();
-        if (!state.inventory.length) {
+        const items = [...state.inventory];
+        if (!items.length) {
           const empty = document.createElement("span");
           empty.className = "inventory-empty";
           empty.textContent = "沿途收集小小幸運";
           inventory.appendChild(empty);
           return;
         }
-        for (const item of state.inventory) {
+        for (const item of items) {
           const badge = document.createElement("span");
           badge.className = "inventory-item";
           badge.textContent = item;
@@ -1187,16 +1713,17 @@
         modalAction.focus({ preventScroll: true });
       }
 
-      function closeModal() {
+      function closeModal(reason = "dismiss") {
         if (modal.hidden || modalAction.disabled) return;
         modal.hidden = true;
         const next = state.modalAction;
         state.modalAction = null;
-        if (next) next();
+        if (next) next(reason);
         else updateToken();
       }
 
-      async function spinCoins(onClose) {
+      async function spinCoins(onClose, zodiacReward = "") {
+        const generation = challengeGeneration;
         const coins = 2 + Math.floor(Math.random() * 4);
         const wheel = $("wheelDisc");
         wheel.classList.add("is-coin");
@@ -1215,21 +1742,28 @@
         wheel.style.transform = "rotate(0deg)";
         openModal({ icon: "🪙", kicker: "金幣轉盤 · 1～5 枚", title: "轉出你的森林金幣！", text: "轉盤上有 1～5，看看這次會得到幾枚金幣！", action: "轉盤轉動中…", wheel: true }, onClose);
         modalAction.disabled = true;
-        await new Promise((resolve) => requestAnimationFrame(resolve));
-        wheel.style.transition = "transform 1.45s cubic-bezier(.12,.72,.15,1)";
-        wheel.style.transform = `rotate(${1080 + 360 - ((coins - 1) * 72 + 36)}deg)`;
-        await wait(1500);
+        const finalAngle = 1080 + 360 - ((coins - 1) * 72 + 36);
+        // Three seconds at constant speed, then one second smoothly slowing to zero.
+        const cruisingAngle = finalAngle * 6 / 7;
+        wheel.style.transform = `rotate(${finalAngle}deg)`;
+        const spin = wheel.animate([
+          { transform: "rotate(0deg)", offset: 0, easing: "linear" },
+          { transform: `rotate(${cruisingAngle}deg)`, offset: .75, easing: "cubic-bezier(.333333,.666667,.666667,1)" },
+          { transform: `rotate(${finalAngle}deg)`, offset: 1 },
+        ], { duration: 4000, easing: "linear" });
+        await spin.finished;
+        if (generation !== challengeGeneration) return;
         state.coins += coins;
-        updateToken();
         addLog("🪙", `金幣轉盤轉出 ${coins} 枚森林金幣。`);
+        updateToken();
         $("modalTitle").textContent = `獲得 ${coins} 枚金幣！`;
-        $("modalText").textContent = `轉盤停在 ${coins}，Claire 收下 ${coins} 枚森林金幣。`;
+        $("modalText").textContent = `轉盤停在 ${coins}，Claire 收下 ${coins} 枚森林金幣。${zodiacReward}`;
         modalAction.textContent = "繼續旅程";
         modalAction.disabled = false;
         modalAction.focus({ preventScroll: true });
       }
 
-      function spinFate({ onClose } = {}) {
+      function spinFate({ onClose, zodiacReward = "" } = {}) {
         const result = FATE_RESULTS[state.fateSpins % FATE_RESULTS.length];
         state.fateSpins++;
         if (result.coins) state.coins += result.coins;
@@ -1247,7 +1781,7 @@
           icon: result.icon,
           kicker: "命運轉盤 · 試試今天的手氣",
           title: result.title,
-          text: result.text,
+          text: `${result.text}${zodiacReward}`,
           action: "繼續旅程",
           grand: result.grandPrize,
           wheel: true,
@@ -1261,7 +1795,7 @@
         });
       }
 
-      function showFinish() {
+      function showFinish(zodiacReward = "") {
         state.gameOver = true;
         state.busy = false;
         updateToken();
@@ -1270,15 +1804,59 @@
           icon: "🎂",
           kicker: "HAPPY 12TH BIRTHDAY",
           title: "Claire，生日快樂！",
-          text: `你走完了 ${SPACE_COUNT} 格星願森林，所有好運都陪你抵達終點。祝你新的一歲，天天都有值得開心的事！`,
+          text: `你走完了 ${SPACE_COUNT} 格星願森林，所有好運都陪你抵達終點。祝你新的一歲，天天都有值得開心的事！${zodiacReward}`,
           action: "收下祝福",
           grand: true,
           decoration: "✦",
-        }, resetGame);
+        }, (reason) => {
+          if (reason === "action") celebrateCourageBadges();
+        });
+      }
+
+      function celebrateCourageBadges() {
+        if (!state.gameOver || state.badgeCelebrated || !ZODIAC.every((animal) => state.courageBadges.has(animal.name))) return;
+        state.badgeCelebrated = true;
+        state.busy = true;
+        updateToken();
+        // Initialize within the blessing button gesture so delayed fanfare can play.
+        const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextConstructor) {
+          try {
+            diceAudioContext ||= new AudioContextConstructor();
+            if (diceAudioContext.state === "suspended") void diceAudioContext.resume().catch(() => {});
+          } catch { /* The message still works when audio is unavailable. */ }
+        }
+        const marks = document.querySelector(".zodiac-marks");
+        const layout = document.querySelector(".game-layout");
+        layout.classList.add("is-badge-celebrating");
+        window.scrollTo({ top: 0, behavior: "instant" });
+        marks.classList.add("is-celebrating");
+        badgeCelebrationTimer = window.setTimeout(() => {
+          badgeCelebrationTimer = null;
+          marks.classList.remove("is-celebrating");
+          playVictoryMusic();
+          addLog("🏆", "成功收集完成 12 生肖勇氣徽章，兌換生日大獎！");
+          openModal({
+            icon: "🏆",
+            kicker: "十二生肖勇氣徽章 · 全數集齊",
+            title: "生日大獎！",
+            text: "恭喜成功收集完成 12 生肖勇氣徽章，兌換生日大獎！",
+            action: "收下生日大獎",
+            grand: true,
+            decoration: "✦",
+          }, () => {
+            layout.classList.remove("is-badge-celebrating");
+            state.busy = false;
+            updateToken();
+          });
+        }, 2000);
       }
 
       function resolveLanding() {
         const landed = tiles[state.position];
+        const zodiacReward = ["coin", "treasure", "fate", "finish"].includes(landed.event)
+          ? grantZodiacReward(landed.animal) : "";
+        if (zodiacReward) updateToken();
         const finishAfterModal = () => {
           if (state.position === FINISH_INDEX) {
             showFinish();
@@ -1290,7 +1868,7 @@
 
         switch (landed.event) {
           case "coin":
-            void spinCoins(finishAfterModal);
+            void spinCoins(finishAfterModal, zodiacReward);
             break;
           case "treasure":
             state.coins += 10;
@@ -1298,38 +1876,21 @@
             renderInventory();
             updateToken();
             addLog("💎", "打開寶箱，得到寶石和 10 枚金幣。");
-            openModal({ icon: "💎", title: "森林寶箱打開了！", text: "裡面有一顆閃閃發亮的森林寶石，還有 10 枚金幣。" }, finishAfterModal);
+            openModal({ icon: "💎", title: "森林寶箱打開了！", text: `裡面有一顆閃閃發亮的森林寶石，價值 10 枚金幣。${zodiacReward}` }, finishAfterModal);
             break;
-          case "item": {
-            const item = landed.index > FINISH_INDEX * .6 ? "小馬幸運鈴" : "星願葉書籤";
-            state.inventory.push(item);
-            renderInventory();
-            updateToken();
-            addLog("🧿", `收到道具：${item}。`);
-            openModal({ icon: "🧿", title: "發現森林小道具", text: `這是送給 Claire 的「${item}」，把它收進口袋吧。` }, finishAfterModal);
-            break;
-          }
           case "fate":
             addLog("🎡", "命運轉盤轉出一份生日好運。");
-            spinFate({ onClose: finishAfterModal });
-            break;
-          case "challenge":
-            state.inventory.push("勇氣徽章");
-            renderInventory();
-            updateToken();
-            addLog("🏓", "球拍亭送出一枚勇氣徽章。");
-            openModal({ icon: "🏓", kicker: "山谷球拍亭", title: "挑戰即將登場！", text: "這裡藏著一個桌球小挑戰，會在第二階段揭曉。今天先收下球拍亭送你的勇氣徽章！" }, finishAfterModal);
+            spinFate({ onClose: finishAfterModal, zodiacReward });
             break;
           case "finish":
             addLog("🏁", "抵達星願森林終點。");
             stopBackgroundMusic();
             playVictoryMusic();
-            showFinish();
+            showFinish(zodiacReward);
             break;
           default:
             addLog(landed.animal.emoji, `經過第 ${state.position + 1} 格的${landed.animal.name}生肖花徑。`);
-            state.busy = false;
-            updateToken();
+            void startBoardChallenge(landed);
         }
       }
 
@@ -1475,7 +2036,7 @@
       }
 
       async function rollTurn() {
-        if (state.busy || state.gameOver) return;
+        if (state.busy || state.gameOver || !modal.hidden || document.querySelector("dialog[open]")) return;
         state.busy = true;
         updateToken();
         const result = Math.floor(Math.random() * 6) + 1;
@@ -1506,6 +2067,87 @@
         resolveLanding();
       }
 
+      // Commit the item use once, then start moving only after dialog cleanup.
+      (() => {
+        const dialog = $("remoteDiceDialog");
+        const opener = $("remoteDiceOpen");
+        const close = $("remoteDiceClose");
+        const choices = [...$("remoteDiceSteps").querySelectorAll('input[name="steps"]')];
+        const go = $("remoteDiceGo");
+        let active = false;
+        let previousOverflow = "";
+        let pendingSteps = null;
+
+        function openDice() {
+          if (active || state.remoteDice < 1 || state.busy || state.gameOver || !modal.hidden || document.querySelector("dialog[open]")) return;
+          active = true;
+          previousOverflow = document.body.style.overflow;
+          pendingSteps = null;
+          choices[0].checked = true;
+          $("remoteDiceSelection").textContent = "前進 1 步";
+          go.disabled = false;
+          try {
+            dialog.showModal();
+            document.body.style.overflow = "hidden";
+            choices[0].focus({ preventScroll: true });
+          } catch {
+            active = false;
+            document.body.style.overflow = previousOverflow;
+          }
+        }
+        function closeDice() {
+          if (active && dialog.open && pendingSteps === null) dialog.close();
+        }
+        opener.addEventListener("click", openDice);
+        close.addEventListener("click", closeDice);
+        dialog.addEventListener("cancel", (event) => { event.preventDefault(); closeDice(); });
+        dialog.addEventListener("close", () => {
+          if (!active || dialog.open) return;
+          const steps = pendingSteps;
+          pendingSteps = null;
+          active = false;
+          document.body.style.overflow = previousOverflow;
+          go.disabled = false;
+          if (steps !== null) {
+            void moveSteps(steps);
+          } else if (!opener.disabled && modal.hidden && !document.querySelector("dialog[open]")) {
+            opener.focus({ preventScroll: true });
+          }
+        });
+        choices.forEach((choice) => choice.addEventListener("change", () => {
+          if (active && dialog.open && pendingSteps === null) {
+            $("remoteDiceSelection").textContent = `前進 ${choice.value} 步`;
+          }
+        }));
+        $("remoteDiceForm").addEventListener("submit", (event) => {
+          event.preventDefault();
+          const steps = Number(choices.find((choice) => choice.checked)?.value);
+          if (!active || !dialog.open || pendingSteps !== null || state.remoteDice < 1 || state.busy || state.gameOver || !modal.hidden || document.querySelector("dialog[open]:not(#remoteDiceDialog)") || !Number.isInteger(steps) || steps < 1 || steps > 6) return;
+          pendingSteps = steps;
+          go.disabled = true;
+          state.remoteDice--;
+          state.started = true;
+          state.busy = true;
+          $("dieFace").textContent = String(steps);
+          updateToken();
+          addLog("🎲", `使用 1 個遙控骰子，指定前進 ${steps} 步。`);
+          dialog.close();
+        });
+        dialog.addEventListener("keydown", (event) => {
+          if (!dialog.open) return;
+          if (event.key === "Enter" && event.repeat) {
+            event.preventDefault();
+          } else if (event.key === "Tab") {
+            const selected = choices.find((choice) => choice.checked) || choices[0];
+            const controls = [close, selected, go].filter((control) => !control.disabled);
+            const index = controls.indexOf(document.activeElement);
+            const next = index < 0 ? (event.shiftKey ? controls.length - 1 : 0) : (index + (event.shiftKey ? -1 : 1) + controls.length) % controls.length;
+            event.preventDefault();
+            controls[next]?.focus();
+          }
+        });
+      })();
+
       $("devMoveForm").addEventListener("submit", (event) => {
         event.preventDefault();
         const steps = $("devMoveSteps").valueAsNumber;
@@ -1517,9 +2159,17 @@
       });
 
       function resetGame() {
+        resetBoardChallenges();
+        window.clearTimeout(badgeCelebrationTimer);
+        badgeCelebrationTimer = null;
+        document.querySelector(".zodiac-marks").classList.remove("is-celebrating");
+        document.querySelector(".game-layout").classList.remove("is-badge-celebrating");
+        state.badgeCelebrated = false;
         state.position = 0;
         state.coins = 0;
         state.pokeChances = 0;
+        state.remoteDice = 0;
+        state.courageBadges.clear();
         state.inventory = [];
         state.started = false;
         state.busy = false;
@@ -1534,6 +2184,8 @@
       }
 
       actionButton.addEventListener("click", () => {
+        if (pendingBoardChallenge?.phase === "paused") { resumeBoardChallenge(); return; }
+        if (state.busy || !modal.hidden || document.querySelector("dialog[open]")) return;
         if (state.gameOver) {
           resetGame();
           return;
@@ -1554,7 +2206,7 @@
         else stopBackgroundMusic();
       });
       updateMusicToggle();
-      modalAction.addEventListener("click", closeModal);
+      modalAction.addEventListener("click", () => closeModal("action"));
       modal.addEventListener("click", (event) => {
         if (event.target === modal && !state.busy) closeModal();
       });
@@ -1587,7 +2239,7 @@
         return duration + (count - 1) * stagger;
       }
 
-      // The minigame runs independently; only claiming rewards updates map counters.
+      // Manual entries are replayable tests; board adapters share the pending challenge lifecycle.
       (() => {
         const dialog = $("memoryDialog");
         const opener = document.querySelector('[data-minigame="1"]');
@@ -1675,7 +2327,7 @@
           dialog.dataset.phase = next;
           status.textContent = message;
           difficultyPanel.hidden = next !== "difficulty";
-          difficultyButtons.forEach((button) => { button.disabled = next !== "difficulty"; });
+          refreshGameControls(session, difficultyButtons, next, "memoryMode", $("memoryClose"));
           $("memoryStatusRow").hidden = next === "difficulty";
           start.disabled = next !== "preview" && next !== "error";
           start.hidden = !["loading", "preview", "error"].includes(next);
@@ -1886,19 +2538,21 @@
           session = null;
         }
 
-        function closeMemory() {
+        function closeMemory(retry = false) {
+          if (!session && !dialog.open) return;
+          if (!prepareGameClose(session, retry)) return;
+          const boardContext = session?.boardContext;
           dispose();
           phase = "closed";
           dialog.dataset.phase = "closed";
-          document.body.style.overflow = previousOverflow;
-          dialog.close();
-          opener.focus({ preventScroll: true });
+          closeGameDialog(1, previousOverflow, boardContext, opener);
         }
 
-        function openMemory() {
-          if (dialog.open || $("collectDialog").open || $("snakeDialog").open || $("compareDialog").open || $("chaseDialog").open || state.busy || !modal.hidden) return;
+        function openMemory(context = null) {
+          if (!canOpenGame(1, context)) return;
           dispose();
           session = { controller: new AbortController(), animations: new Set(), tones: new Set(), mode: null, correctCount: null, rewardClaimed: false };
+          attachBoardRun(session, 1, context);
           delete dialog.dataset.mode;
           pictures = [];
           cards = [];
@@ -1919,7 +2573,8 @@
           timer.classList.remove("is-urgent");
           setPhase("difficulty", "");
           dialog.showModal();
-          difficultyButtons[0].focus({ preventScroll: true });
+          difficultyButtons.find((button) => !button.disabled)?.focus({ preventScroll: true });
+          if (context?.mode) chooseDifficulty(context.mode);
           dialog.scrollTop = 0;
         }
 
@@ -1927,6 +2582,7 @@
           const run = session;
           const mode = MODES[key];
           if (!run || !active(run) || phase !== "difficulty" || run.mode || !mode) return;
+          if (!chooseBoardMode(run, key)) return;
           run.mode = mode;
           dialog.dataset.mode = key;
           dialog.style.setProperty("--memory-columns", String(mode.columns));
@@ -1979,9 +2635,10 @@
         }
 
         async function play(run) {
+          if (!active(run) || phase !== "preview" || !startBoardGame(run)) return;
           try {
             setPhase("initial-cover", "先把圖案蓋起來…");
-            $("memoryClose").focus({ preventScroll: true });
+            focusGameControl(1);
             coverCards(true, 1000);
             await delay(1000, run);
             if (!active(run)) return;
@@ -2033,10 +2690,9 @@
             cards[0].focus({ preventScroll: true });
           } catch (error) {
             if (error.name === "AbortError" || !active(run)) return;
-            // Fail back to a fresh preview rather than leave a stuck animation.
+            // Pause the board challenge for a fresh retry rather than leave a stuck animation.
             console.error("Memory game:", error);
-            closeMemory();
-            openMemory();
+            closeMemory("pause");
           }
         }
 
@@ -2047,7 +2703,7 @@
           cards.forEach((card) => card.classList.remove("is-selecting"));
           setPhase("checking", "開始逐張核對答案…");
           updateCardLabels();
-          $("memoryClose").focus({ preventScroll: true });
+          focusGameControl(1);
           let correctCount = 0;
           try {
             for (let index = 0; index < cards.length; index++) {
@@ -2073,12 +2729,12 @@
               updateCardLabels();
             }
             run.correctCount = correctCount;
+            finishBoardGame(run);
             setPhase("results", `核對完成！答對 ${correctCount} / ${cards.length} 張。`);
           } catch (error) {
             if (error.name === "AbortError" || !active(run)) return;
             console.error("Memory answer check:", error);
-            closeMemory();
-            openMemory();
+            closeMemory("pause");
           }
         }
 
@@ -2095,6 +2751,7 @@
           const reward = rewardForScore(run.correctCount, run.mode);
           state.coins += reward.coins;
           state.pokeChances += reward.pokeChances;
+          originalRewardGranted(run);
           updateToken();
           boardPanel.hidden = true;
           selectionPanel.hidden = true;
@@ -2102,7 +2759,7 @@
           rewardStage.replaceChildren();
           rewardMessage.textContent = reward.pokeChances ? "戳戳樂 +1 次" : `獲得 ${reward.coins} 枚森林金幣！`;
           setPhase("rewarding", reward.pokeChances ? "16 張全對！獲得戳戳樂機會。" : `答對 ${run.correctCount} 張，領取你的${run.correctCount < run.mode.participationThreshold ? "參加獎" : "獎勵"}！`);
-          $("memoryClose").focus({ preventScroll: true });
+          focusGameControl(1);
           dialog.scrollTop = 0;
           if (reward.pokeChances) {
             const gift = document.createElement("div");
@@ -2156,7 +2813,8 @@
           else closeMemory();
         }
 
-        opener.addEventListener("click", openMemory);
+        boardGames.set(1, { id: 1, name: "記憶大考驗", icon: "🧠", modes: Object.keys(MODES), dialog, open: openMemory, close: closeMemory });
+        opener.addEventListener("click", () => openMemory());
         difficultyButtons.forEach((button) => {
           button.addEventListener("click", () => chooseDifficulty(button.dataset.memoryMode));
         });
@@ -2171,16 +2829,13 @@
             void play(session);
           }
         });
-        $("memoryClose").addEventListener("click", closeMemory);
+        $("memoryClose").addEventListener("click", () => closeMemory());
         $("memoryReturn").addEventListener("click", returnToBoard);
         dialog.addEventListener("cancel", (event) => {
           event.preventDefault();
           escapeMemory();
         });
-        dialog.addEventListener("close", () => {
-          // A queued close event must not dispose a newly opened session.
-          if (!dialog.open && session) closeMemory();
-        });
+        dialog.addEventListener("close", () => onGameDialogClose(1, session, closeMemory));
         document.addEventListener("keydown", (event) => {
           if (!dialog.open) return;
           if (event.key === "Escape") {
@@ -2381,7 +3036,7 @@
           dialog.dataset.phase = next;
           status.textContent = message;
           difficulty.hidden = next !== "difficulty";
-          modeButtons.forEach((button) => { button.disabled = next !== "difficulty"; });
+          refreshGameControls(session, modeButtons, next, "collectMode", $("collectClose"));
           panel.hidden = next === "difficulty" || next === "closed";
           start.hidden = !["difficulty", "loading", "preview", "error"].includes(next);
           start.disabled = !["preview", "error"].includes(next);
@@ -2481,17 +3136,19 @@
           if (phase === "playing") phase = "closed";
           restoreMapMusic(run);
         }
-        function closeCollect() {
+        function closeCollect(retry = false) {
+          if (!session && !dialog.open) return;
+          if (!prepareGameClose(session, retry)) return;
+          const boardContext = session?.boardContext;
           dispose();
           setPhase("closed", "");
-          document.body.style.overflow = previousOverflow;
-          dialog.close();
-          opener.focus({ preventScroll: true });
+          closeGameDialog(2, previousOverflow, boardContext, opener);
         }
-        function openCollect() {
-          if (dialog.open || $("memoryDialog").open || $("snakeDialog").open || $("compareDialog").open || $("chaseDialog").open || state.busy || !modal.hidden) return;
+        function openCollect(context = null) {
+          if (!canOpenGame(2, context)) return;
           dispose();
           session = { closed: false, mode: null, duration: MODES.easy.duration, lastPose: "rest", boostUntil: 0, shield: false, speedCollected: false, shieldCollected: false, keys: new Set(), items: [], tones: new Set(), animations: new Set(), rewardClaimed: false, rewardTimer: null, finalScore: null, music: null, musicFast: false, restoreMapMusic: false, counts: Object.fromEntries([...ITEMS, ...HARD_EXTRAS].map((item) => [item.key, 0])), x: WIDTH / 2, frame: null, endTimer: null };
+          attachBoardRun(session, 2, context);
           previousOverflow = document.body.style.overflow;
           document.body.style.overflow = "hidden";
           drops.replaceChildren();
@@ -2508,12 +3165,14 @@
           buildInventory(session);
           setPhase("difficulty", "");
           dialog.showModal();
-          $("collectEasy").focus({ preventScroll: true });
+          modeButtons.find((button) => !button.disabled)?.focus({ preventScroll: true });
+          if (context?.mode) chooseCollectMode(context.mode);
           dialog.scrollTop = 0;
         }
         function chooseCollectMode(mode) {
           const run = session;
           if (!run || !active(run) || phase !== "difficulty" || run.mode || !MODES[mode]) return;
+          if (!chooseBoardMode(run, mode)) return;
           run.mode = mode;
           run.duration = MODES[mode].duration;
           seconds.textContent = String(run.duration / 1000);
@@ -2609,12 +3268,13 @@
           const reward = collectRewardForScore(run.finalScore, run.mode);
           state.coins += reward.coins;
           state.pokeChances += reward.pokeChances;
+          originalRewardGranted(run);
           updateToken();
           rewardStage.replaceChildren();
           rewardMessage.textContent = reward.pokeChances ? "戳戳樂 +1 次" : `獲得 ${reward.coins} 枚森林金幣！`;
           const participationThreshold = run.mode === "hard" ? 100 : 90;
           setPhase("rewarding", `${run.finalScore} 分，領取你的${run.finalScore < participationThreshold ? "參加獎" : "獎勵"}！`);
-          $("collectClose").focus({ preventScroll: true });
+          focusGameControl(2);
           dialog.scrollTop = 0;
           if (reward.pokeChances) {
             const gift = document.createElement("div");
@@ -2644,6 +3304,7 @@
           clearPowers(run);
           const total = ITEMS.reduce((sum, type) => sum + run.counts[type.key], 0);
           run.finalScore = scoreFor(run);
+          finishBoardGame(run);
           setPhase("finished", `收集完成！共接到 ${total} 個寶物，總分 ${run.finalScore} 分。`);
           stopCollectAudio(run);
           restoreMapMusic(run);
@@ -2709,7 +3370,7 @@
           run.frame = requestAnimationFrame((time) => tick(run, time));
         }
         function begin(run) {
-          if (!active(run) || phase !== "preview") return;
+          if (!active(run) || phase !== "preview" || !startBoardGame(run)) return;
           run.items = makeSchedule(run);
           run.startedAt = performance.now();
           run.lastFrame = run.startedAt;
@@ -2717,7 +3378,7 @@
           overlay.hidden = true;
           clearKeys(run);
           setPhase("playing", run.mode === "hard" ? "← / → 移動，接寶物、閃炸彈與大便！" : "按住 ← / → 移動，接住掉落的寶物！");
-          $("collectClose").focus({ preventScroll: true });
+          focusGameControl(2);
           run.endTimer = window.setTimeout(() => finish(run), run.duration);
           run.frame = requestAnimationFrame((time) => tick(run, time));
           run.restoreMapMusic = Boolean(backgroundMusicSource) || pendingMapMusicRestore;
@@ -2725,13 +3386,14 @@
           stopBackgroundMusic();
           prepareCollectAudio(run);
         }
-        opener.addEventListener("click", openCollect);
+        boardGames.set(2, { id: 2, name: "收集金幣", icon: "🪙", modes: Object.keys(MODES), dialog, open: openCollect, close: closeCollect });
+        opener.addEventListener("click", () => openCollect());
         modeButtons.forEach((button) => button.addEventListener("click", () => chooseCollectMode(button.dataset.collectMode)));
         start.addEventListener("click", () => { if (phase === "error") void loadRider(session); else if (phase === "preview") begin(session); });
         rewardButton.addEventListener("click", () => claimCollectReward(session));
-        $("collectClose").addEventListener("click", closeCollect);
+        $("collectClose").addEventListener("click", () => closeCollect());
         dialog.addEventListener("cancel", (event) => { event.preventDefault(); closeCollect(); });
-        dialog.addEventListener("close", () => { if (!dialog.open && session) closeCollect(); });
+        dialog.addEventListener("close", () => onGameDialogClose(2, session, closeCollect));
         document.addEventListener("keydown", (event) => {
           if (!dialog.open) return;
           if (["ArrowLeft", "ArrowRight"].includes(event.key)) {
@@ -2809,7 +3471,7 @@
           phase = next;
           dialog.dataset.phase = next;
           difficulty.hidden = next !== "difficulty";
-          modeButtons.forEach((button) => { button.disabled = next !== "difficulty"; });
+          refreshGameControls(session, modeButtons, next, "snakeMode", $("snakeClose"));
           panel.hidden = next === "difficulty" || next === "closed";
           start.hidden = next !== "preview";
           start.disabled = next !== "preview";
@@ -2945,18 +3607,19 @@
           stopTones(run);
           session = null;
         }
-        function closeSnake() {
+        function closeSnake(retry = false) {
           if (!session && !dialog.open) return;
+          if (!prepareGameClose(session, retry)) return;
+          const boardContext = session?.boardContext;
           dispose();
           setPhase("closed", "");
-          document.body.style.overflow = previousOverflow;
-          dialog.close();
-          opener.focus({ preventScroll: true });
+          closeGameDialog(3, previousOverflow, boardContext, opener);
         }
-        function openSnake() {
-          if (dialog.open || $("memoryDialog").open || $("collectDialog").open || $("compareDialog").open || $("chaseDialog").open || state.busy || !modal.hidden) return;
+        function openSnake(context = null) {
+          if (!canOpenGame(3, context)) return;
           dispose();
           session = { closed: false, mode: null, snake: [8 * SIZE + 8], fruits: new Map(), obstacles: new Set(), direction: null, turns: [], completed: 0, eaten: 0, lives: 2, hit: false, frame: null, endTimer: null, tones: new Set(), animations: new Set(), rewardClaimed: false, rewardTimer: null, accumulator: 0, lastFrame: 0, deadline: 0 };
+          attachBoardRun(session, 3, context);
           previousOverflow = document.body.style.overflow;
           document.body.style.overflow = "hidden";
           delete dialog.dataset.mode;
@@ -2976,11 +3639,13 @@
           rewardMessage.textContent = "";
           setPhase("difficulty", "");
           dialog.showModal();
-          normal.focus({ preventScroll: true });
+          modeButtons.find((button) => !button.disabled)?.focus({ preventScroll: true });
+          if (context?.mode) chooseMode(context.mode);
           dialog.scrollTop = 0;
         }
         function chooseMode(mode) {
           if (!session || !active(session) || phase !== "difficulty" || !Object.hasOwn(MODES, mode)) return;
+          if (!chooseBoardMode(session, mode)) return;
           session.mode = mode;
           session.lives = MODES[mode].lives;
           dialog.dataset.mode = mode;
@@ -3013,6 +3678,7 @@
           seconds.textContent = String(Math.max(0, Math.ceil((run.deadline - performance.now()) / 1000)));
           run.hit = reason === "撞到牆了！" || reason === "撞到自己了！" || reason === "撞到障礙物了！";
           render(run);
+          finishBoardGame(run, run.mode === "normal" && run.completed === 0);
           setPhase("finished", "挑戰結束");
           const title = document.createElement("strong");
           title.textContent = reason;
@@ -3034,11 +3700,12 @@
           const reward = snakeRewardForLevels(run.completed, run.mode);
           state.coins += reward.coins;
           state.pokeChances += reward.pokeChances;
+          originalRewardGranted(run);
           updateToken();
           rewardStage.replaceChildren();
           rewardMessage.textContent = reward.pokeChances ? "戳戳樂 +1 次" : `獲得 ${reward.coins} 枚森林金幣${reward.coins === 1 ? "（參加獎）" : ""}！`;
           setPhase("rewarding", `通過 ${run.completed} 關，領取你的${reward.coins === 1 ? "參加獎" : "獎勵"}！`);
-          $("snakeClose").focus({ preventScroll: true });
+          focusGameControl(3);
           dialog.scrollTop = 0;
           if (reward.pokeChances) {
             const gift = document.createElement("div");
@@ -3105,12 +3772,12 @@
           if (inRound()) run.frame = requestAnimationFrame((time) => tick(run, time));
         }
         function begin(run) {
-          if (!active(run) || phase !== "preview") return;
+          if (!active(run) || phase !== "preview" || !startBoardGame(run)) return;
           const now = performance.now();
           run.lastFrame = now;
           run.deadline = now + MODES[run.mode].duration;
           setPhase("playing", "按方向鍵出發！");
-          $("snakeClose").focus({ preventScroll: true });
+          focusGameControl(3);
           prepareAudio();
           run.endTimer = window.setTimeout(() => finish(run, "時間到！"), MODES[run.mode].duration);
           run.frame = requestAnimationFrame((time) => tick(run, time));
@@ -3132,13 +3799,14 @@
           if (direction === planned || DIRECTIONS[direction] === -DIRECTIONS[planned] || run.turns.length >= 2) return;
           run.turns.push(direction);
         }
-        opener.addEventListener("click", openSnake);
+        boardGames.set(3, { id: 3, name: "貪食蛇", icon: "🐍", modes: Object.keys(MODES), dialog, open: openSnake, close: closeSnake });
+        opener.addEventListener("click", () => openSnake());
         modeButtons.forEach((button) => button.addEventListener("click", () => chooseMode(button.dataset.snakeMode)));
         start.addEventListener("click", () => { if (session) begin(session); });
         rewardButton.addEventListener("click", () => claimSnakeReward(session));
-        $("snakeClose").addEventListener("click", closeSnake);
+        $("snakeClose").addEventListener("click", () => closeSnake());
         dialog.addEventListener("cancel", (event) => { event.preventDefault(); closeSnake(); });
-        dialog.addEventListener("close", () => { if (!dialog.open && session) closeSnake(); });
+        dialog.addEventListener("close", () => onGameDialogClose(3, session, closeSnake));
         document.addEventListener("keydown", (event) => {
           if (!dialog.open || !session) return;
           if (Object.hasOwn(DIRECTIONS, event.key)) {
@@ -3207,9 +3875,7 @@
           void promise.catch((error) => {
             if (error.name === "AbortError" || !active(run)) return;
             console.error("Matching game:", error);
-            closeCompare();
-            openCompare();
-            status.textContent = "遊戲中斷，請重新選擇難度。";
+            closeCompare("pause");
           });
         }
         function shuffled(items) {
@@ -3246,7 +3912,7 @@
           dialog.dataset.phase = next;
           status.textContent = message;
           $("compareDifficulty").hidden = next !== "difficulty";
-          modeButtons.forEach((button) => { button.disabled = next !== "difficulty"; });
+          refreshGameControls(session, modeButtons, next, "compareMode", $("compareClose"));
           $("compareGamePanel").hidden = ["difficulty", "closed"].includes(next);
           start.hidden = !["loading", "preview", "error"].includes(next);
           start.disabled = !["preview", "error"].includes(next);
@@ -3311,18 +3977,19 @@
           session.animations.clear();
           session = null;
         }
-        function closeCompare() {
+        function closeCompare(retry = false) {
           if (!session && !dialog.open) return;
+          if (!prepareGameClose(session, retry)) return;
+          const boardContext = session?.boardContext;
           dispose();
           setPhase("closed");
-          document.body.style.overflow = previousOverflow;
-          dialog.close();
-          opener.focus({ preventScroll: true });
+          closeGameDialog(4, previousOverflow, boardContext, opener);
         }
-        function openCompare() {
-          if (dialog.open || $("memoryDialog").open || $("collectDialog").open || $("snakeDialog").open || $("chaseDialog").open || state.busy || !modal.hidden) return;
+        function openCompare(context = null) {
+          if (!canOpenGame(4, context)) return;
           dispose();
           session = { controller: new AbortController(), animations: new Set(), mode: null, columns: 0, cards: [], first: null, pairs: 0, mistakes: 0, angelUses: 0, deadline: 0, finalPairs: null, rewardClaimed: false };
+          attachBoardRun(session, 4, context);
           delete dialog.dataset.mode;
           previousOverflow = document.body.style.overflow;
           document.body.style.overflow = "hidden";
@@ -3336,11 +4003,13 @@
           timer.classList.remove("is-urgent");
           setPhase("difficulty");
           dialog.showModal();
-          $("compareEasy").focus({ preventScroll: true });
+          modeButtons.find((button) => !button.disabled)?.focus({ preventScroll: true });
+          if (context?.mode) chooseMode(context.mode);
           dialog.scrollTop = 0;
         }
         function chooseMode(mode) {
           if (!session || !active(session) || phase !== "difficulty" || !Object.hasOwn(MODES, mode)) return;
+          if (!chooseBoardMode(session, mode)) return;
           session.mode = mode;
           session.angelUses = MODES[mode].angelUses;
           dialog.dataset.mode = mode;
@@ -3377,8 +4046,9 @@
           }
         }
         async function play(run) {
+          if (!active(run) || phase !== "preview" || !startBoardGame(run)) return;
           setPhase("duplicate", `每張牌都有另一半，共${MODES[run.mode].pairs}組！`);
-          $("compareClose").focus({ preventScroll: true });
+          focusGameControl(4);
           buildCards(run, 2);
           await Promise.all(run.cards.map((card) => card.querySelector("img").decode()));
           if (!active(run)) return;
@@ -3436,6 +4106,7 @@
         function finish(run) {
           if (!active(run) || phase !== "resolve") return;
           run.finalPairs = run.pairs;
+          finishBoardGame(run);
           setPhase("finished", "挑戰結束");
           const title = document.createElement("strong");
           const mode = MODES[run.mode];
@@ -3451,7 +4122,7 @@
           if (assisted) run.angelUses--;
           if (firstSelection) run.first = card;
           setPhase(firstSelection ? "flip-first" : "flip-second");
-          $("compareClose").focus({ preventScroll: true });
+          focusGameControl(4);
           cover(run, [card], false, 300);
           if (firstSelection) card.classList.add("is-first");
           await delay(300, run);
@@ -3502,12 +4173,13 @@
           const perfect = reward.pokeChances > 0;
           state.coins += coins;
           state.pokeChances += reward.pokeChances;
+          originalRewardGranted(run);
           updateToken();
           const stage = $("compareRewardStage");
           stage.replaceChildren();
           $("compareRewardMessage").textContent = perfect ? "戳戳樂 +1 次" : `獲得 ${coins} 枚森林金幣${coins === 1 ? "（參加獎）" : ""}！`;
           setPhase("rewarding", "領取配對獎勵！");
-          $("compareClose").focus({ preventScroll: true });
+          focusGameControl(4);
           dialog.scrollTop = 0;
           if (perfect) {
             const gift = document.createElement("div");
@@ -3523,7 +4195,8 @@
           run.animations.clear();
           setPhase("rewarded", "獎勵已加入森林金幣！");
         }
-        opener.addEventListener("click", openCompare);
+        boardGames.set(4, { id: 4, name: "配對遊戲", icon: "🃏", modes: Object.keys(MODES), dialog, open: openCompare, close: closeCompare });
+        opener.addEventListener("click", () => openCompare());
         modeButtons.forEach((button) => button.addEventListener("click", () => chooseMode(button.dataset.compareMode)));
         start.addEventListener("click", () => {
           if (!session || !active(session)) return;
@@ -3537,9 +4210,9 @@
           if (partner) perform(selectCard(run, partner, true), run);
         });
         rewardButton.addEventListener("click", () => { if (session) perform(claimReward(session), session); });
-        $("compareClose").addEventListener("click", closeCompare);
+        $("compareClose").addEventListener("click", () => closeCompare());
         dialog.addEventListener("cancel", (event) => { event.preventDefault(); closeCompare(); });
-        dialog.addEventListener("close", () => { if (!dialog.open && session) closeCompare(); });
+        dialog.addEventListener("close", () => onGameDialogClose(4, session, closeCompare));
         document.addEventListener("keydown", (event) => {
           if (!dialog.open || !session) return;
           if (event.key === "Escape") {
@@ -3636,7 +4309,7 @@
           dialog.dataset.phase = next;
           $("chaseDifficulty").hidden = next !== "difficulty";
           $("chaseGamePanel").hidden = ["difficulty", "closed"].includes(next);
-          modeButtons.forEach((button) => { button.disabled = next !== "difficulty"; });
+          refreshGameControls(session, modeButtons, next, "chaseMode", $("chaseClose"));
           start.hidden = !["loading", "preview", "error"].includes(next);
           start.disabled = !["preview", "error"].includes(next);
           start.textContent = next === "error" ? "重新載入" : "開始";
@@ -3663,18 +4336,19 @@
           session.animations.clear();
           session = null;
         }
-        function closeChase() {
+        function closeChase(retry = false) {
           if (!session && !dialog.open) return;
+          if (!prepareGameClose(session, retry)) return;
+          const boardContext = session?.boardContext;
           dispose();
           setPhase("closed");
-          document.body.style.overflow = previousOverflow;
-          dialog.close();
-          opener.focus({ preventScroll: true });
+          closeGameDialog(5, previousOverflow, boardContext, opener);
         }
-        function openChase() {
-          if (dialog.open || $("memoryDialog").open || $("collectDialog").open || $("snakeDialog").open || $("compareDialog").open || state.busy || !modal.hidden) return;
+        function openChase(context = null) {
+          if (!canOpenGame(5, context)) return;
           dispose();
           session = { closed: false, mode: null, frame: null, animations: new Set(), x: COURSE.bikeStart, truckFront: COURSE.truckStart, speed: COURSE.baseSpeed, stunLeft: 0, correct: 0, question: null, questionId: 0, lastWall: 0, elapsed: 0, composing: false, resumePhase: null, finalResult: null, rewardClaimed: false, rewardTimer: null };
+          attachBoardRun(session, 5, context);
           previousOverflow = document.body.style.overflow;
           document.body.style.overflow = "hidden";
           delete dialog.dataset.mode;
@@ -3687,7 +4361,8 @@
           answerRow.classList.remove("is-wrong");
           setPhase("difficulty");
           dialog.showModal();
-          modeButtons[0].focus({ preventScroll: true });
+          modeButtons.find((button) => !button.disabled)?.focus({ preventScroll: true });
+          if (context?.mode) chooseMode(context.mode);
           dialog.scrollTop = 0;
         }
         async function loadRider(run) {
@@ -3706,6 +4381,7 @@
         function chooseMode(mode) {
           const run = session;
           if (!run || !active(run) || phase !== "difficulty" || !Object.hasOwn(MODES, mode)) return;
+          if (!chooseBoardMode(run, mode)) return;
           run.mode = mode;
           dialog.dataset.mode = mode;
           $("chaseGamePanel").setAttribute("aria-label", `${MODES[mode].name}數學追逐`);
@@ -3720,6 +4396,7 @@
           const title = document.createElement("strong");
           title.textContent = won ? "安全抵達終點！🏁" : "被貨車追上了！";
           run.finalResult = { won, correct: run.correct };
+          finishBoardGame(run);
           result.replaceChildren(title, document.createTextNode(`答對 ${run.correct} 題 · ${MODES[run.mode].name}模式`));
           setPhase("finished", won ? "成功甩開貨車！" : "挑戰結束");
           dialog.scrollTop = 0;
@@ -3741,11 +4418,12 @@
           const reward = rewardForResult(run);
           state.coins += reward.coins;
           state.pokeChances += reward.pokeChances;
+          originalRewardGranted(run);
           updateToken();
           rewardStage.replaceChildren();
           rewardMessage.textContent = reward.pokeChances ? "戳戳樂 +1 次" : `獲得 ${reward.coins} 枚森林金幣！`;
           setPhase("rewarding", "領取你的獎勵！");
-          $("chaseClose").focus({ preventScroll: true });
+          focusGameControl(5);
           dialog.scrollTop = 0;
           if (reward.pokeChances) {
             const gift = document.createElement("div");
@@ -3821,7 +4499,7 @@
           if (active(run) && inMotion()) run.frame = requestAnimationFrame((time) => tick(run, time));
         }
         function begin(run) {
-          if (!run || !active(run) || phase !== "preview") return;
+          if (!run || !active(run) || phase !== "preview" || !startBoardGame(run)) return;
           generateQuestion(run);
           run.lastWall = performance.now();
           setPhase("playing", "答對就加速！");
@@ -3887,7 +4565,8 @@
             run.frame = requestAnimationFrame((time) => tick(run, time));
           }
         }
-        opener.addEventListener("click", openChase);
+        boardGames.set(5, { id: 5, name: "機車追逐(數學題)", icon: "🛵", modes: Object.keys(MODES), dialog, open: openChase, close: closeChase });
+        opener.addEventListener("click", () => openChase());
         modeButtons.forEach((button) => button.addEventListener("click", () => chooseMode(button.dataset.chaseMode)));
         start.addEventListener("click", () => {
           if (!session || !active(session)) return;
@@ -3901,9 +4580,9 @@
         input.addEventListener("compositionstart", () => { if (session) session.composing = true; });
         input.addEventListener("compositionend", () => { if (session) session.composing = false; });
         input.addEventListener("input", () => { if (phase === "playing") input.removeAttribute("aria-invalid"); });
-        $("chaseClose").addEventListener("click", closeChase);
+        $("chaseClose").addEventListener("click", () => closeChase());
         dialog.addEventListener("cancel", (event) => { event.preventDefault(); closeChase(); });
-        dialog.addEventListener("close", () => { if (!dialog.open && session) closeChase(); });
+        dialog.addEventListener("close", () => onGameDialogClose(5, session, closeChase));
         document.addEventListener("keydown", (event) => {
           if (!dialog.open || !session) return;
           if (event.key === "Escape") {
@@ -3921,6 +4600,130 @@
         window.addEventListener("blur", syncVisibility);
         window.addEventListener("focus", syncVisibility);
         document.addEventListener("visibilitychange", syncVisibility);
+      })();
+
+      // Each shop purchase requires a fresh confirmation and credits exactly once.
+      (() => {
+        const dialog = $("shopDialog");
+        const opener = $("shopOpen");
+        const close = $("shopClose");
+        const products = $("shopProducts");
+        const productButtons = [...products.querySelectorAll("[data-shop-product]")];
+        const confirmation = $("shopConfirm");
+        const confirmButton = $("shopConfirmYes");
+        const feedback = $("shopFeedback");
+        const PRODUCTS = {
+          remoteDice: { name: "遙控骰子", price: 8 },
+          poke: { name: "戳戳樂", price: 10 },
+        };
+        let active = false;
+        let previousOverflow = "";
+        let pendingProduct = null;
+        function renderShop() {
+          $("shopBalance").textContent = `目前金幣：${state.coins} 點 · 遙控骰子：${state.remoteDice} 個 · 戳戳樂：${state.pokeChances} 次`;
+          products.hidden = pendingProduct !== null;
+          productButtons.forEach((button) => {
+            button.disabled = pendingProduct !== null || state.coins < PRODUCTS[button.dataset.shopProduct].price;
+          });
+          confirmation.hidden = pendingProduct === null;
+          confirmButton.disabled = pendingProduct === null;
+          $("shopConfirmText").textContent = pendingProduct === null ? "" : `是否花費${PRODUCTS[pendingProduct].price}點金幣兌換${PRODUCTS[pendingProduct].name}？`;
+        }
+        function focusProduct(key) {
+          const button = productButtons.find((item) => item.dataset.shopProduct === key && !item.disabled)
+            || productButtons.find((item) => !item.disabled)
+            || close;
+          button.focus();
+        }
+        function restore() {
+          if (!active) return;
+          active = false;
+          pendingProduct = null;
+          renderShop();
+          document.body.style.overflow = previousOverflow;
+          opener.focus({ preventScroll: true });
+        }
+        function openShop() {
+          if (active || state.busy || !modal.hidden || document.querySelector("dialog[open]")) return;
+          previousOverflow = document.body.style.overflow;
+          active = true;
+          pendingProduct = null;
+          feedback.textContent = "";
+          renderShop();
+          try {
+            dialog.showModal();
+            document.body.style.overflow = "hidden";
+            dialog.scrollTop = 0;
+            close.focus({ preventScroll: true });
+          } catch {
+            restore();
+          }
+        }
+        function closeShop() {
+          pendingProduct = null;
+          renderShop();
+          if (active && dialog.open) dialog.close();
+        }
+        function chooseProduct(key) {
+          if (!active || !dialog.open || pendingProduct !== null || !Object.hasOwn(PRODUCTS, key)) return;
+          const product = PRODUCTS[key];
+          feedback.textContent = "";
+          if (state.coins < product.price) {
+            feedback.textContent = `金幣不足！兌換${product.name}需要${product.price}點金幣，目前有${state.coins}點。`;
+            renderShop();
+            feedback.scrollIntoView({ block: "nearest" });
+            return;
+          }
+          pendingProduct = key;
+          renderShop();
+          confirmButton.focus();
+        }
+        function cancelPurchase() {
+          if (!active || !dialog.open || pendingProduct === null) return;
+          const key = pendingProduct;
+          pendingProduct = null;
+          renderShop();
+          focusProduct(key);
+        }
+        function confirmPurchase() {
+          if (!active || !dialog.open || pendingProduct === null) return;
+          const key = pendingProduct;
+          const product = PRODUCTS[key];
+          pendingProduct = null;
+          if (state.coins < product.price) {
+            feedback.textContent = `金幣不足！兌換${product.name}需要${product.price}點金幣，目前有${state.coins}點。`;
+          } else {
+            state.coins -= product.price;
+            if (key === "remoteDice") state.remoteDice++;
+            else state.pokeChances++;
+            renderInventory();
+            updateToken();
+            addLog(key === "remoteDice" ? "🎲" : "🎁", `花費${product.price}點金幣兌換${product.name}。`);
+            feedback.textContent = `兌換成功！獲得${product.name}${key === "remoteDice" ? " 1 個" : " +1 次"}。`;
+          }
+          renderShop();
+          focusProduct(key);
+        }
+        opener.addEventListener("click", openShop);
+        productButtons.forEach((button) => button.addEventListener("click", () => chooseProduct(button.dataset.shopProduct)));
+        $("shopCancel").addEventListener("click", cancelPurchase);
+        confirmButton.addEventListener("click", confirmPurchase);
+        close.addEventListener("click", closeShop);
+        dialog.addEventListener("cancel", (event) => { event.preventDefault(); closeShop(); });
+        dialog.addEventListener("close", () => { if (!dialog.open) restore(); });
+        dialog.addEventListener("keydown", (event) => {
+          if (!dialog.open) return;
+          if (event.key === "Escape") {
+            event.preventDefault(); event.stopPropagation(); closeShop();
+          } else if (event.key === "Tab") {
+            const controls = [...dialog.querySelectorAll("button:not(:disabled)")].filter((button) => button.getClientRects().length > 0);
+            const index = controls.indexOf(document.activeElement);
+            const next = index < 0 ? (event.shiftKey ? controls.length - 1 : 0) : (index + (event.shiftKey ? -1 : 1) + controls.length) % controls.length;
+            event.preventDefault(); controls[next]?.focus();
+          } else if (event.key === "Enter" && event.repeat) {
+            event.preventDefault();
+          }
+        });
       })();
 
       makeTiles();
