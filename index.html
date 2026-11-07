@@ -133,6 +133,7 @@
     .dev-game-button:hover { background: var(--leaf-light); }
     .dev-game-button:active { transform: translateY(1px); }
     .dev-move-form { display: flex; align-items: center; gap: 8px; margin-bottom: 11px; }
+    .map-heading[hidden], .dev-move-form[hidden] { display: none; }
     .dev-move-input { width: 120px; min-width: 0; min-height: 40px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; color: var(--forest); background: var(--paper-bright); font: inherit; font-size: 16px; }
     .dev-move-input:focus-visible { outline: 3px solid #d27398; outline-offset: 2px; }
     .dev-move-form :disabled { opacity: .5; cursor: not-allowed; }
@@ -359,7 +360,7 @@
       aspect-ratio: 1;
       border: 5px solid #fff;
       border-radius: 50%;
-      background: conic-gradient(#f3c75e 0 120deg, #84c8bf 120deg 240deg, #df91ac 240deg 360deg);
+      background: conic-gradient(#f3c75e 0 180deg, #84c8bf 180deg 360deg);
       box-shadow: 0 0 0 2px #d5c6a2, 0 6px 0 #b6a57d;
       transition: transform 1.45s cubic-bezier(.12,.72,.15,1);
     }
@@ -757,7 +758,7 @@
           <img src="mark12/mark11.png" alt="狗" draggable="false">
           <img src="mark12/mark12.png" alt="豬" draggable="false">
         </div>
-        <div class="map-heading" role="group" aria-label="開發用小遊戲按鈕">
+        <div class="map-heading" role="group" aria-label="開發用小遊戲按鈕" hidden>
           <button class="dev-game-button" type="button" data-minigame="1">小遊戲1</button>
           <button class="dev-game-button" type="button" data-minigame="2">小遊戲2</button>
           <button class="dev-game-button" type="button" data-minigame="3">小遊戲3</button>
@@ -769,7 +770,7 @@
           <button class="dev-game-button" type="button" data-minigame="9">小遊戲9</button>
           <button class="dev-game-button" type="button" data-minigame="10">小遊戲10</button>
         </div>
-        <form class="dev-move-form" id="devMoveForm" aria-label="測試角色移動步數">
+        <form class="dev-move-form" id="devMoveForm" aria-label="測試角色移動步數" hidden>
           <input class="dev-move-input" id="devMoveSteps" type="number" min="1" step="1" required placeholder="移動步數" aria-label="移動步數">
           <button class="dev-game-button" id="devMoveGo" type="submit">Go</button>
         </form>
@@ -905,7 +906,6 @@
       <h2 class="modal-title" id="modalTitle">發現一份驚喜</h2>
       <div class="wheel-wrap" id="fateWheel" aria-hidden="true" hidden><div class="wheel" id="wheelDisc"></div><span class="wheel-pointer"></span></div>
       <p class="modal-text" id="modalText"></p>
-      <p class="grand-note" id="grandNote" hidden>最大的生日禮物，由家人為你準備 ✦</p>
       <button class="modal-action" id="modalAction" type="button">繼續旅程</button>
     </div>
   </div>
@@ -1259,7 +1259,7 @@
           [.12, "coin"], [.32, "treasure"],
           [.39, "fate"], [.45, "coin"], [.59, "treasure"],
           [.73, "fate"], [.80, "coin"],
-          [.93, "treasure"], [.98, "fate"],
+          [.93, "treasure"],
         ];
         for (const [progress, type] of events) {
           const index = Math.max(1, Math.min(FINISH_INDEX - 1, Math.round(FINISH_INDEX * progress)));
@@ -1278,7 +1278,6 @@
       const FATE_RESULTS = [
         { index: 0, icon: "🪙", title: "星星金幣！", text: "命運轉盤停在金色星星，森林送你 8 枚金幣。", coins: 8 },
         { index: 1, icon: "🌟", title: "幸運星願吊飾！", text: "一枚小小星願吊飾落進口袋，今天的運氣真好。", item: "星願吊飾" },
-        { index: 2, icon: "🎁", title: "Claire 的生日大獎！", text: "轉盤亮起最閃耀的星星！你贏得了 12 歲生日特別大獎！", grandPrize: true },
       ];
 
       const state = {
@@ -1292,7 +1291,6 @@
         started: false,
         busy: false,
         gameOver: false,
-        grandPrize: false,
         fateSpins: 0,
         modalAction: null,
       };
@@ -1704,7 +1702,6 @@
         $("modalTitle").textContent = title;
         $("modalText").textContent = text;
         $("modalDecoration").textContent = decoration;
-        $("grandNote").hidden = !grand;
         $("fateWheel").hidden = !wheel;
         modalAction.textContent = action;
         modalAction.disabled = false;
@@ -1768,7 +1765,6 @@
         state.fateSpins++;
         if (result.coins) state.coins += result.coins;
         if (result.item) state.inventory.push(result.item);
-        if (result.grandPrize) state.grandPrize = true;
         renderInventory();
         updateToken();
         const wheel = $("wheelDisc");
@@ -1783,12 +1779,11 @@
           title: result.title,
           text: `${result.text}${zodiacReward}`,
           action: "繼續旅程",
-          grand: result.grandPrize,
           wheel: true,
-          decoration: result.grandPrize ? "✦" : "",
         }, onClose);
-        const centers = [60, 180, 300];
-        const extra = (360 - centers[result.index]) % 360;
+        const segmentAngle = 360 / FATE_RESULTS.length;
+        const center = (result.index + .5) * segmentAngle;
+        const extra = (360 - center) % 360;
         requestAnimationFrame(() => {
           wheel.style.transition = "transform 1.45s cubic-bezier(.12,.72,.15,1)";
           wheel.style.transform = `rotate(${1080 + extra}deg)`;
@@ -2174,7 +2169,6 @@
         state.started = false;
         state.busy = false;
         state.gameOver = false;
-        state.grandPrize = false;
         state.fateSpins = 0;
         $("dieFace").textContent = "⚄";
         $("eventLog").replaceChildren();
@@ -3452,6 +3446,7 @@
         const rewardStage = $("snakeRewardStage");
         const rewardMessage = $("snakeRewardMessage");
         const SIZE = 16;
+        const WALL_GRACE_MS = 500;
         const MODES = {
           normal: { name: "一般", duration: 60000, levels: 6, lives: 2, step: 180, fastStep: 180, fastFrom: Infinity },
           hard: { name: "困難", duration: 120000, levels: 10, lives: 2, step: 180, fastStep: 150, fastFrom: 8 },
@@ -3604,6 +3599,7 @@
           run.animations.forEach((animation) => animation.cancel());
           run.animations.clear();
           run.turns.length = 0;
+          run.wallGraceUntil = null;
           stopTones(run);
           session = null;
         }
@@ -3618,7 +3614,7 @@
         function openSnake(context = null) {
           if (!canOpenGame(3, context)) return;
           dispose();
-          session = { closed: false, mode: null, snake: [8 * SIZE + 8], fruits: new Map(), obstacles: new Set(), direction: null, turns: [], completed: 0, eaten: 0, lives: 2, hit: false, frame: null, endTimer: null, tones: new Set(), animations: new Set(), rewardClaimed: false, rewardTimer: null, accumulator: 0, lastFrame: 0, deadline: 0 };
+          session = { closed: false, mode: null, snake: [8 * SIZE + 8], fruits: new Map(), obstacles: new Set(), direction: null, turns: [], completed: 0, eaten: 0, lives: 2, hit: false, frame: null, endTimer: null, tones: new Set(), animations: new Set(), rewardClaimed: false, rewardTimer: null, accumulator: 0, lastFrame: 0, deadline: 0, wallGraceUntil: null };
           attachBoardRun(session, 3, context);
           previousOverflow = document.body.style.overflow;
           document.body.style.overflow = "hidden";
@@ -3659,6 +3655,7 @@
         function collide(run, reason) {
           if (!active(run) || phase !== "playing") return;
           if (performance.now() >= run.deadline) { finish(run, "時間到！"); return; }
+          run.wallGraceUntil = null;
           run.lives--;
           if (run.lives === 0) { finish(run, reason); return; }
           run.direction = null;
@@ -3674,6 +3671,7 @@
           cancelAnimationFrame(run.frame);
           clearTimeout(run.endTimer);
           run.turns.length = 0;
+          run.wallGraceUntil = null;
           stopTones(run);
           seconds.textContent = String(Math.max(0, Math.ceil((run.deadline - performance.now()) / 1000)));
           run.hit = reason === "撞到牆了！" || reason === "撞到自己了！" || reason === "撞到障礙物了！";
@@ -3723,7 +3721,7 @@
             setPhase("rewarded", "獎勵已加入森林金幣！");
           }, duration);
         }
-        function move(run) {
+        function move(run, now = performance.now()) {
           if (run.turns.length) run.direction = run.turns.shift();
           const head = run.snake[0];
           const direction = run.direction;
@@ -3731,7 +3729,17 @@
           const crossesWall = next < 0 || next >= SIZE * SIZE ||
             (direction === "ArrowLeft" && head % SIZE === 0) ||
             (direction === "ArrowRight" && head % SIZE === SIZE - 1);
-          if (crossesWall) { collide(run, "撞到牆了！"); return; }
+          if (crossesWall) {
+            run.wallGraceUntil ??= now + WALL_GRACE_MS;
+            run.accumulator = 0;
+            status.textContent = "快轉彎！撞牆有 0.5 秒寬限。";
+            return;
+          }
+          if (run.wallGraceUntil !== null) {
+            run.wallGraceUntil = null;
+            run.accumulator = 0;
+            status.textContent = "成功轉彎！繼續吃水果。";
+          }
           if (run.obstacles.has(next)) { collide(run, "撞到障礙物了！"); return; }
           const growing = run.fruits.has(next);
           const solidBody = growing ? run.snake : run.snake.slice(0, -1);
@@ -3760,13 +3768,17 @@
           seconds.parentElement.classList.toggle("is-urgent", remaining <= 5);
           const gap = now - run.lastFrame;
           run.lastFrame = now;
-          if (document.hidden || !run.direction || gap > 250) run.accumulator = 0;
+          if (run.wallGraceUntil !== null) {
+            run.accumulator = 0;
+            if (now >= run.wallGraceUntil) collide(run, "撞到牆了！");
+            else if (!document.hidden && run.turns.length) move(run, now);
+          } else if (document.hidden || !run.direction || gap > 250) run.accumulator = 0;
           else {
             run.accumulator += gap;
             const step = movementStep(run);
             if (run.accumulator >= step) {
               run.accumulator %= step;
-              move(run);
+              move(run, now);
             }
           }
           if (inRound()) run.frame = requestAnimationFrame((time) => tick(run, time));
@@ -3785,6 +3797,7 @@
         function turn(run, direction) {
           const now = performance.now();
           if (now >= run.deadline) { finish(run, "時間到！"); return; }
+          if (run.wallGraceUntil !== null && now >= run.wallGraceUntil) { collide(run, "撞到牆了！"); return; }
           if (document.hidden) return;
           if (!run.direction) {
             run.direction = direction;
@@ -3798,6 +3811,7 @@
           const planned = run.turns.at(-1) || run.direction;
           if (direction === planned || DIRECTIONS[direction] === -DIRECTIONS[planned] || run.turns.length >= 2) return;
           run.turns.push(direction);
+          while (run.wallGraceUntil !== null && run.turns.length) move(run, now);
         }
         boardGames.set(3, { id: 3, name: "貪食蛇", icon: "🐍", modes: Object.keys(MODES), dialog, open: openSnake, close: closeSnake });
         opener.addEventListener("click", () => openSnake());
