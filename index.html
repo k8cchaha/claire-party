@@ -2457,8 +2457,8 @@
         const difficultyPanel = $("memoryDifficultyPanel");
         const difficultyButtons = [...difficultyPanel.querySelectorAll("button[data-memory-mode]")];
         const MODES = Object.freeze({
-          normal: Object.freeze({ columns: 3, count: 9, folder: "game3x3", seconds: 10, optionColumns: 3, specials: false, participationThreshold: 5 }),
-          hard: Object.freeze({ columns: 4, count: 16, folder: "game4x4", seconds: 15, optionColumns: 8, specials: true, participationThreshold: 8 }),
+          normal: Object.freeze({ columns: 3, count: 9, folder: "game3x3", seconds: 15, optionColumns: 3, specials: false, participationThreshold: 5 }),
+          hard: Object.freeze({ columns: 4, count: 16, folder: "game4x4", seconds: 30, optionColumns: 8, specials: true, participationThreshold: 8 }),
         });
         let specialUses = { angel: 0, hint: 0 };
         // Hint keys match the image filenames: 1 -> img1.png, ..., 16 -> img16.png.
@@ -3454,10 +3454,10 @@
         }
         function collectRewardForScore(score, mode) {
           if (mode === "hard") {
-            if (score >= 140) return { coins: 0, pokeChances: 1 };
-            return { coins: score >= 130 ? 8 : score >= 125 ? 7 : score >= 120 ? 6 : score >= 115 ? 5 : score >= 110 ? 4 : score >= 105 ? 3 : score >= 100 ? 2 : 1, pokeChances: 0 };
+            if (score >= 130) return { coins: 0, pokeChances: 1 };
+            return { coins: score >= 120 ? 8 : score >= 115 ? 7 : score >= 110 ? 6 : score >= 105 ? 5 : score >= 100 ? 4 : score >= 95 ? 3 : score >= 90 ? 2 : 1, pokeChances: 0 };
           }
-          return { coins: score >= 130 ? 6 : score >= 120 ? 5 : score >= 110 ? 4 : score >= 100 ? 3 : score >= 90 ? 2 : 1, pokeChances: 0 };
+          return { coins: score >= 120 ? 6 : score >= 110 ? 5 : score >= 100 ? 4 : score >= 90 ? 3 : score >= 80 ? 2 : 1, pokeChances: 0 };
         }
         function claimCollectReward(run) {
           if (!run || !active(run) || phase !== "finished" || run.rewardClaimed || run.finalScore === null) return;
@@ -3470,7 +3470,7 @@
           updateToken();
           rewardStage.replaceChildren();
           rewardMessage.textContent = reward.pokeChances ? "戳戳樂 +1 次" : `獲得 ${reward.coins} 枚森林金幣！`;
-          const participationThreshold = run.mode === "hard" ? 100 : 90;
+          const participationThreshold = run.mode === "hard" ? 90 : 80;
           setPhase("rewarding", `${run.finalScore} 分，領取你的${run.finalScore < participationThreshold ? "參加獎" : "獎勵"}！`);
           focusGameControl(2);
           dialog.scrollTop = 0;
@@ -3654,7 +3654,7 @@
         const WALL_GRACE_MS = 500;
         const MODES = {
           normal: { name: "一般", duration: 60000, levels: 6, lives: 2, step: 180, fastStep: 180, fastFrom: Infinity },
-          hard: { name: "困難", duration: 120000, levels: 10, lives: 2, step: 180, fastStep: 150, fastFrom: 8 },
+          hard: { name: "困難", duration: 120000, levels: 10, lives: 3, step: 180, fastStep: 150, fastFrom: 8 },
         };
         const movementStep = (run) => run.completed + 1 >= MODES[run.mode].fastFrom ? MODES[run.mode].fastStep : MODES[run.mode].step;
         const canClaimReward = (run) => run && !run.rewardClaimed && (run.mode === "hard" || (run.mode === "normal" && run.completed > 0));
@@ -3854,7 +3854,7 @@
           seconds.textContent = String(MODES[mode].duration / 1000);
           spawnLevel(session);
           render(session);
-          setPhase("preview", mode === "hard" ? "避開石塊！第 8～10 關加速，共 2 命。" : "方向鍵移動，吃水果；小心撞牆與自己！");
+          setPhase("preview", mode === "hard" ? `避開石塊！第 8～10 關加速，共 ${MODES[mode].lives} 命。` : "方向鍵移動，吃水果；小心撞牆與自己！");
           start.focus({ preventScroll: true });
         }
         function collide(run, reason) {
@@ -4066,9 +4066,9 @@
         const timer = $("compareTimer");
         const animals = ["鼠", "牛", "虎", "兔", "龍", "蛇", "馬", "羊", "猴", "雞", "狗", "豬"];
         const MODES = {
-          easy: { name: "簡單", pairs: 6, seconds: 10, mistakeLimit: 2, angelUses: 0, directory: "amount6", prefix: "hunter", previewColumns: 3, playColumns: 4, rewards: [1, 1, 1, 2, 3, 4, 4] },
-          normal: { name: "一般", pairs: 8, seconds: 15, mistakeLimit: 3, angelUses: 0, directory: "amount8", prefix: "img", previewColumns: 4, playColumns: 6, rewards: [1, 1, 1, 2, 3, 4, 5, 6, 6] },
-          hard: { name: "困難", pairs: 12, seconds: 30, mistakeLimit: 4, angelUses: 1, directory: "amount12", prefix: "animal", previewColumns: 6, playColumns: 8 },
+          easy: { name: "簡單", pairs: 6, seconds: 15, mistakeLimit: 2, angelUses: 0, directory: "amount6", prefix: "hunter", previewColumns: 3, playColumns: 4, rewards: [1, 1, 1, 2, 3, 4, 4] },
+          normal: { name: "一般", pairs: 8, seconds: 20, mistakeLimit: 3, angelUses: 0, directory: "amount8", prefix: "img", previewColumns: 4, playColumns: 6, rewards: [1, 1, 1, 2, 3, 4, 5, 6, 6] },
+          hard: { name: "困難", pairs: 12, seconds: 40, mistakeLimit: 4, angelUses: 1, directory: "amount12", prefix: "animal", previewColumns: 6, playColumns: 8 },
         };
         const modeButtons = [...$("compareDifficulty").querySelectorAll("[data-compare-mode]")];
         const matchingPhases = ["pick-first", "flip-first", "pick-second", "flip-second", "resolve", "finished"];
