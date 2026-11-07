@@ -43,6 +43,21 @@
     button { font: inherit; }
     button:focus-visible { outline: 3px solid #d27398; outline-offset: 3px; }
 
+    #gameContent[hidden], .entry-gate[hidden] { display: none; }
+    body.is-entry-locked { padding-bottom: max(18px, env(safe-area-inset-bottom)); }
+    .entry-gate { min-height: 100svh; display: grid; place-items: center; padding: 24px 0; }
+    .entry-card { width: min(380px, 100%); padding: clamp(24px, 6vw, 36px); border: 1px solid var(--line); border-radius: 12px 30px 12px 30px; background: var(--paper-bright); box-shadow: 0 12px 35px var(--shadow); text-align: center; }
+    .entry-icon { display: block; margin-bottom: 14px; font-size: 42px; }
+    .entry-title { margin: 0; font: 700 clamp(22px, 6vw, 28px)/1.3 var(--serif); }
+    .entry-description { margin: 12px 0 22px; color: var(--muted); font-size: 14px; }
+    .entry-label { display: block; margin-bottom: 8px; text-align: left; font-size: 14px; font-weight: 800; }
+    .entry-input { width: 100%; min-height: 48px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink); font: 20px var(--sans); letter-spacing: 5px; text-align: center; }
+    .entry-input:focus-visible { outline: 3px solid var(--rose); outline-offset: 3px; }
+    .entry-input[aria-invalid="true"] { border-color: #a93659; }
+    .entry-feedback { min-height: 24px; margin: 10px 0 14px; color: #a93659; font-size: 13px; }
+    .entry-submit { width: 100%; min-height: 48px; padding: 10px 16px; border: 0; border-radius: 8px 14px 8px 14px; background: var(--forest); color: var(--paper-bright); font-weight: 800; cursor: pointer; }
+    .entry-submit:hover { background: var(--forest-deep); }
+
     .page { width: min(1120px, 100%); margin: 0 auto; }
     .masthead {
       display: flex;
@@ -260,8 +275,10 @@
     .status-top { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
     .status-top h2 { margin: 0; font-family: var(--serif); font-size: 19px; }
     .step-count { color: var(--forest); font-size: 12px; font-weight: 900; white-space: nowrap; }
-    .music-toggle { display: grid; place-items: center; width: 30px; height: 30px; flex: 0 0 30px; padding: 0; border: 1px solid var(--line); border-radius: 50%; color: var(--forest); background: var(--paper-bright); font-size: 17px; cursor: pointer; }
+    .music-toggle { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; padding: 0; border: 1px solid var(--line); border-radius: 50%; color: var(--forest); background: var(--paper-bright); font-size: 20px; cursor: pointer; }
     .music-toggle[aria-pressed="true"] { border-color: #92aa79; background: #e8f1db; }
+    .music-caption { display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: baseline; margin: 6px 0 0; color: var(--forest); font-size: 11px; }
+    .music-caption small { color: var(--muted); font-size: 10px; }
     .progress-track { height: 8px; margin: 12px 0 13px; overflow: hidden; border-radius: 8px; background: #e6e9db; }
     .progress-fill { width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #759469, #e0a1b5); transition: width .3s ease; }
     .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
@@ -728,7 +745,22 @@
     }
   </style>
 </head>
-<body>
+<body class="is-entry-locked">
+  <section class="entry-gate" id="entryGate" aria-labelledby="entryTitle">
+    <div class="entry-card">
+      <span class="entry-icon" aria-hidden="true">🌈</span>
+      <h1 class="entry-title" id="entryTitle">星願森林的通關碼</h1>
+      <p class="entry-description" id="entryDescription">輸入通關碼，開啟 Claire 的生日冒險！</p>
+      <form id="entryForm" novalidate>
+        <label class="entry-label" for="entryCode">通關碼</label>
+        <input class="entry-input" id="entryCode" type="password" inputmode="numeric" maxlength="8" autocomplete="off" required aria-describedby="entryDescription entryFeedback" autofocus>
+        <p class="entry-feedback" id="entryFeedback" role="status" aria-live="polite"></p>
+        <button class="entry-submit" type="submit">進入星願森林</button>
+      </form>
+      <noscript><p class="entry-description">請啟用 JavaScript 才能輸入通關碼並進入遊戲。</p></noscript>
+    </div>
+  </section>
+  <div id="gameContent" hidden inert>
   <div class="page">
     <header class="masthead">
       <div class="brand">
@@ -864,8 +896,9 @@
           <div class="status-top">
             <h2 id="statusTitle">旅程準備中</h2>
             <span class="step-count" id="stepCount">1 / 45 格</span>
-            <button class="music-toggle" id="musicToggle" type="button" aria-label="關閉背景音樂" aria-pressed="true" title="背景音樂">♫</button>
+            <button class="music-toggle" id="musicToggle" type="button" aria-label="切換至第 2 首：糖果圓舞曲" aria-pressed="true" title="切換至第 2 首：糖果圓舞曲" aria-describedby="musicTrackName">♫</button>
           </div>
+          <p class="music-caption"><span id="musicTrackName">♫ 1/5 · 森林小步舞</span><small>點音符切換／靜音</small></p>
           <div class="progress-track" role="progressbar" aria-label="森林旅程進度" aria-valuemin="0" aria-valuemax="44" aria-valuenow="0" id="progressTrack">
             <div class="progress-fill" id="progressFill"></div>
           </div>
@@ -1227,7 +1260,45 @@
     </form>
   </dialog>
 
+  </div>
   <script>
+    (() => {
+      "use strict";
+      // Front-end entry gate only; not a secure authentication boundary.
+      const ENTRY_CODE = "04280705";
+      const gate = document.getElementById("entryGate");
+      const content = document.getElementById("gameContent");
+      const form = document.getElementById("entryForm");
+      const input = document.getElementById("entryCode");
+      const feedback = document.getElementById("entryFeedback");
+      let unlocked = false;
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (unlocked) return;
+        if (input.value !== ENTRY_CODE) {
+          input.setAttribute("aria-invalid", "true");
+          feedback.textContent = input.value ? "通關碼不正確，請再試一次。" : "請先輸入通關碼。";
+          input.focus({ preventScroll: true });
+          input.select();
+          return;
+        }
+        unlocked = true;
+        input.value = "";
+        feedback.textContent = "";
+        input.removeAttribute("aria-invalid");
+        content.hidden = false;
+        content.inert = false;
+        gate.hidden = true;
+        document.body.classList.remove("is-entry-locked");
+        window.scrollTo({ top: 0, behavior: "instant" });
+        document.getElementById("actionButton").focus({ preventScroll: true });
+      });
+      input.addEventListener("input", () => {
+        input.removeAttribute("aria-invalid");
+        feedback.textContent = "";
+      });
+    })();
+
     (() => {
       "use strict";
 
@@ -1791,6 +1862,7 @@
       }
 
       function showFinish(zodiacReward = "") {
+        stopBackgroundMusic();
         state.gameOver = true;
         state.busy = false;
         updateToken();
@@ -1890,75 +1962,190 @@
       }
 
       let diceAudioContext;
+      // Original eight-bar scores: MIDI notes, with 0 representing an eighth-note rest.
+      const BACKGROUND_TRACKS = [
+        {
+          name: "森林小步舞", bpm: 116, meter: 4, brightness: .18, decay: 8, swing: .08,
+          melody: [
+            72, 0, 76, 79, 76, 0, 74, 76, 79, 0, 81, 79, 76, 74, 72, 0,
+            77, 0, 81, 84, 81, 79, 77, 0, 76, 79, 83, 79, 74, 0, 71, 0,
+            72, 76, 79, 84, 83, 81, 79, 0, 81, 0, 79, 76, 74, 76, 72, 0,
+            77, 81, 79, 77, 76, 74, 72, 0, 74, 76, 79, 71, 72, 0, 0, 0,
+          ],
+          chords: [[48, 64, 67], [45, 60, 64], [53, 65, 69], [55, 62, 71], [48, 64, 67], [45, 60, 64], [53, 65, 69], [55, 62, 71]],
+        },
+        {
+          name: "糖果圓舞曲", bpm: 132, meter: 3, brightness: .1, decay: 5, swing: 0,
+          melody: [
+            79, 0, 83, 86, 83, 0, 81, 0, 84, 88, 84, 0,
+            83, 86, 91, 86, 83, 0, 81, 79, 78, 76, 74, 0,
+            79, 83, 86, 88, 86, 83, 84, 0, 88, 86, 84, 81,
+            83, 79, 81, 78, 74, 0, 79, 0, 83, 0, 79, 0,
+          ],
+          chords: [[43, 59, 62], [48, 60, 64], [47, 62, 67], [50, 62, 66], [43, 59, 62], [48, 60, 64], [50, 62, 66], [43, 59, 62]],
+        },
+        {
+          name: "小兔野餐", bpm: 108, meter: 4, brightness: .08, decay: 10, swing: .16,
+          melody: [
+            77, 81, 0, 84, 81, 0, 79, 77, 79, 0, 81, 84, 86, 84, 81, 0,
+            82, 0, 86, 89, 86, 84, 82, 0, 81, 79, 77, 0, 76, 79, 84, 0,
+            77, 0, 81, 84, 86, 0, 84, 81, 79, 81, 84, 0, 81, 79, 77, 0,
+            82, 86, 84, 82, 81, 0, 79, 0, 79, 76, 72, 0, 77, 0, 0, 0,
+          ],
+          chords: [[41, 57, 60], [50, 62, 65], [46, 62, 65], [48, 60, 64], [41, 57, 60], [50, 62, 65], [46, 62, 65], [48, 60, 64]],
+        },
+        {
+          name: "彩虹旋轉木馬", bpm: 126, meter: 3, brightness: .24, decay: 6, swing: 0,
+          melody: [
+            76, 79, 83, 88, 83, 79, 81, 84, 88, 89, 88, 84,
+            79, 83, 86, 88, 86, 83, 78, 81, 86, 81, 78, 0,
+            76, 79, 83, 88, 91, 88, 89, 88, 84, 81, 84, 88,
+            86, 83, 79, 78, 81, 74, 76, 0, 79, 0, 76, 0,
+          ],
+          chords: [[40, 55, 59], [45, 60, 64], [43, 59, 62], [47, 62, 66], [40, 55, 59], [45, 60, 64], [47, 62, 66], [40, 55, 59]],
+        },
+        {
+          name: "星星跳跳糖", bpm: 138, meter: 4, brightness: .28, decay: 12, swing: .04,
+          melody: [
+            74, 0, 81, 78, 86, 0, 81, 0, 83, 81, 78, 0, 76, 78, 81, 0,
+            79, 83, 86, 0, 88, 86, 83, 79, 81, 0, 85, 88, 85, 81, 76, 0,
+            86, 81, 78, 74, 78, 0, 81, 86, 83, 0, 86, 90, 86, 83, 81, 0,
+            79, 83, 86, 79, 81, 85, 88, 81, 78, 76, 74, 0, 74, 0, 0, 0,
+          ],
+          chords: [[38, 54, 57], [47, 62, 66], [43, 59, 62], [45, 61, 64], [38, 54, 57], [47, 62, 66], [43, 59, 62], [45, 61, 64]],
+        },
+      ];
       let backgroundMusicEnabled = true;
+      let backgroundTrackIndex = 0;
+      const backgroundMusicBuffers = new Map();
       let backgroundMusicSource = null;
       let backgroundMusicGain = null;
-      let backgroundMusicBuffer = null;
+      let retiringBackgroundMusic = null;
+      let backgroundMusicRequest = 0;
+      let backgroundMusicWanted = false;
+      let collectMusicOwner = null;
 
-      function createBackgroundMusicBuffer(context) {
-        const duration = 8;
+      function createBackgroundMusicBuffer(context, track) {
+        const beat = 60 / track.bpm;
+        const duration = track.melody.length * beat / 2;
         const sampleRate = context.sampleRate;
-        const buffer = context.createBuffer(1, Math.floor(sampleRate * duration), sampleRate);
+        const buffer = context.createBuffer(1, Math.ceil(sampleRate * duration), sampleRate);
         const samples = buffer.getChannelData(0);
-        const melody = [72, 76, 79, 76, 74, 76, 81, 79, 72, 76, 79, 84, 81, 79, 76, 74];
-        const chords = [[48, 55, 60], [53, 60, 65], [55, 62, 67], [45, 52, 57]];
-        const frequency = (midi) => 440 * Math.pow(2, (midi - 69) / 12);
-        const chordAt = (notes, time) =>
-          Math.sin(2 * Math.PI * frequency(notes[0]) * time) * .012 +
-          Math.sin(2 * Math.PI * frequency(notes[1]) * time) * .009 +
-          Math.sin(2 * Math.PI * frequency(notes[2]) * time) * .006;
-
-        for (let index = 0; index < samples.length; index++) {
-          const time = index / sampleRate;
-          const beat = Math.floor(time / .5);
-          const noteTime = time - beat * .5;
-          const noteFrequency = frequency(melody[beat % melody.length]);
-          const envelope = Math.exp(-noteTime * 7) * Math.min(1, noteTime / .018);
-          const pluck = (Math.sin(2 * Math.PI * noteFrequency * noteTime) +
-            Math.sin(4 * Math.PI * noteFrequency * noteTime) * .18) * envelope * .17;
-          const bar = Math.floor(time / 2) % chords.length;
-          const blend = Math.min(1, Math.max(0, ((time % 2) - 1.72) / .28));
-          const harmony = chordAt(chords[bar], time) * (1 - blend) +
-            chordAt(chords[(bar + 1) % chords.length], time) * blend;
-          const fade = Math.max(0, Math.min(1, time / .03, (duration - time) / .08));
-          samples[index] = (pluck + harmony) * fade;
+        function note(midi, start, length, volume, decay, brightness = 0) {
+          if (!midi) return;
+          const frequency = 440 * Math.pow(2, (midi - 69) / 12);
+          const first = Math.round(start * sampleRate);
+          const last = Math.min(samples.length, Math.ceil((start + length) * sampleRate));
+          for (let i = first; i < last; i++) {
+            const time = (i - first) / sampleRate;
+            const attack = Math.min(1, time / .008);
+            const release = Math.min(1, Math.max(0, (length - time) / .025));
+            const angle = 2 * Math.PI * frequency * time;
+            const tone = Math.sin(angle) + brightness * Math.sin(angle * 2) + brightness * .15 * Math.sin(angle * 3);
+            samples[i] += tone * attack * release * Math.exp(-time * decay) * volume;
+          }
+        }
+        track.melody.forEach((midi, i) => {
+          const start = (i / 2 + (i % 2 ? track.swing : 0)) * beat;
+          note(midi, start, beat * .8, i % 2 ? .16 : .19, track.decay, track.brightness);
+        });
+        track.chords.forEach((chord, bar) => {
+          for (let count = 0; count < track.meter; count++) {
+            const start = (bar * track.meter + count) * beat;
+            // Soft bass on the downbeat; offbeat chords give a bouncy music-box feel.
+            note(count % 2 ? chord[0] + 7 : chord[0], start, beat * .7, .065, 9);
+            chord.slice(1).forEach((midi) => note(midi, start + beat * .5, beat * .5, .032, 8, .05));
+            note(chord[1] + 12, start + beat * .5, beat * .45, .035, 14, track.brightness);
+          }
+        });
+        for (let i = 0; i < samples.length; i++) {
+          const time = i / sampleRate;
+          samples[i] *= Math.max(0, Math.min(1, time / .008, (duration - time) / .025));
         }
         return buffer;
       }
 
+      function canPlayBackgroundMusic() {
+        return backgroundMusicWanted && backgroundMusicEnabled && !$("gameContent").hidden && !state.gameOver && !collectMusicOwner;
+      }
       function startBackgroundMusic() {
-        if (!backgroundMusicEnabled || backgroundMusicSource) return;
-        const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContextConstructor) return;
+        if (!backgroundMusicEnabled || $("gameContent").hidden || state.gameOver || collectMusicOwner) return;
+        backgroundMusicWanted = true;
+        if (backgroundMusicSource) return;
+        const Constructor = window.AudioContext || window.webkitAudioContext;
+        if (!Constructor) return;
+        const request = ++backgroundMusicRequest;
+        const trackIndex = backgroundTrackIndex;
         try {
-          diceAudioContext ||= new AudioContextConstructor();
-        } catch {
-          return;
-        }
-        const context = diceAudioContext;
-        if (context.state === "suspended") void context.resume().catch(() => {});
-        backgroundMusicBuffer ||= createBackgroundMusicBuffer(context);
-        backgroundMusicSource = context.createBufferSource();
-        backgroundMusicGain = context.createGain();
-        backgroundMusicSource.buffer = backgroundMusicBuffer;
-        backgroundMusicSource.loop = true;
-        backgroundMusicGain.gain.setValueAtTime(.0001, context.currentTime);
-        backgroundMusicGain.gain.exponentialRampToValueAtTime(.24, context.currentTime + 1.2);
-        backgroundMusicSource.connect(backgroundMusicGain);
-        backgroundMusicGain.connect(context.destination);
-        backgroundMusicSource.start();
+          diceAudioContext ||= new Constructor();
+          const context = diceAudioContext;
+          const play = () => {
+            if (request !== backgroundMusicRequest || trackIndex !== backgroundTrackIndex || !canPlayBackgroundMusic() || backgroundMusicSource || context.state !== "running") return;
+            let source, gain;
+            try {
+              if (!backgroundMusicBuffers.has(trackIndex)) backgroundMusicBuffers.set(trackIndex, createBackgroundMusicBuffer(context, BACKGROUND_TRACKS[trackIndex]));
+              source = context.createBufferSource();
+              gain = context.createGain();
+              source.buffer = backgroundMusicBuffers.get(trackIndex);
+              source.loop = true;
+              gain.gain.setValueAtTime(.0001, context.currentTime);
+              gain.gain.exponentialRampToValueAtTime(.24, context.currentTime + .15);
+              source.connect(gain);
+              gain.connect(context.destination);
+              const audio = { source, gain };
+              source.onended = () => {
+                source.disconnect();
+                gain.disconnect();
+                if (backgroundMusicSource === source) { backgroundMusicSource = null; backgroundMusicGain = null; }
+                if (retiringBackgroundMusic === audio) retiringBackgroundMusic = null;
+              };
+              source.start();
+              backgroundMusicSource = source;
+              backgroundMusicGain = gain;
+            } catch {
+              source?.disconnect();
+              gain?.disconnect();
+            }
+          };
+          if (context.state === "suspended") void context.resume().then(play).catch(() => {});
+          else play();
+        } catch { /* Music is optional; the adventure still works without audio. */ }
       }
 
-      function stopBackgroundMusic() {
+      function stopBackgroundMusic(immediate = false) {
+        ++backgroundMusicRequest;
+        backgroundMusicWanted = false;
+        if (retiringBackgroundMusic) {
+          const old = retiringBackgroundMusic;
+          retiringBackgroundMusic = null;
+          old.source.onended = null;
+          try { old.source.stop(); } catch { /* Already stopped. */ }
+          old.source.disconnect();
+          old.gain.disconnect();
+        }
         if (!backgroundMusicSource) return;
-        const context = diceAudioContext;
-        const stopAt = context.currentTime + .18;
-        backgroundMusicGain.gain.cancelScheduledValues(context.currentTime);
-        backgroundMusicGain.gain.setValueAtTime(Math.max(.0001, backgroundMusicGain.gain.value), context.currentTime);
-        backgroundMusicGain.gain.exponentialRampToValueAtTime(.0001, stopAt);
-        backgroundMusicSource.stop(stopAt);
+        const audio = { source: backgroundMusicSource, gain: backgroundMusicGain };
         backgroundMusicSource = null;
         backgroundMusicGain = null;
+        const context = diceAudioContext;
+        if (immediate || context.state !== "running") {
+          audio.source.onended = null;
+          try { audio.source.stop(); } catch { /* Already stopped. */ }
+          audio.source.disconnect();
+          audio.gain.disconnect();
+          return;
+        }
+        retiringBackgroundMusic = audio;
+        // Capture retired nodes: an old end event must never clear a newer track.
+        audio.source.onended = () => {
+          audio.source.disconnect();
+          audio.gain.disconnect();
+          if (retiringBackgroundMusic === audio) retiringBackgroundMusic = null;
+        };
+        audio.gain.gain.cancelScheduledValues(context.currentTime);
+        audio.gain.gain.setValueAtTime(Math.max(.0001, audio.gain.gain.value), context.currentTime);
+        audio.gain.gain.exponentialRampToValueAtTime(.0001, context.currentTime + .08);
+        audio.source.stop(context.currentTime + .08);
       }
 
       function playVictoryMusic() {
@@ -1985,9 +2172,17 @@
       }
 
       function updateMusicToggle() {
+        const next = (backgroundTrackIndex + 1) % BACKGROUND_TRACKS.length;
+        const action = !backgroundMusicEnabled ? `開啟第 1 首：${BACKGROUND_TRACKS[0].name}`
+          : backgroundTrackIndex === BACKGROUND_TRACKS.length - 1 ? "關閉背景音樂（靜音）"
+          : `切換至第 ${next + 1} 首：${BACKGROUND_TRACKS[next].name}`;
         musicToggle.setAttribute("aria-pressed", String(backgroundMusicEnabled));
-        musicToggle.setAttribute("aria-label", backgroundMusicEnabled ? "關閉背景音樂" : "開啟背景音樂");
+        musicToggle.setAttribute("aria-label", action);
+        musicToggle.title = action;
         musicToggle.textContent = backgroundMusicEnabled ? "♫" : "♪";
+        $("musicTrackName").textContent = backgroundMusicEnabled
+          ? `♫ ${backgroundTrackIndex + 1}/${BACKGROUND_TRACKS.length} · ${BACKGROUND_TRACKS[backgroundTrackIndex].name}`
+          : "背景音樂已靜音";
       }
 
 
@@ -2154,6 +2349,8 @@
       });
 
       function resetGame() {
+        state.started = false;
+        stopBackgroundMusic(true);
         resetBoardChallenges();
         window.clearTimeout(badgeCelebrationTimer);
         badgeCelebrationTimer = null;
@@ -2194,10 +2391,16 @@
         rollTurn();
       });
       musicToggle.addEventListener("click", () => {
-        backgroundMusicEnabled = !backgroundMusicEnabled;
+        if ($("gameContent").hidden) return;
+        stopBackgroundMusic();
+        if (!backgroundMusicEnabled) {
+          backgroundTrackIndex = 0;
+          backgroundMusicEnabled = true;
+        } else if (backgroundTrackIndex === BACKGROUND_TRACKS.length - 1) {
+          backgroundMusicEnabled = false;
+        } else backgroundTrackIndex++;
         updateMusicToggle();
         if (backgroundMusicEnabled) startBackgroundMusic();
-        else stopBackgroundMusic();
       });
       updateMusicToggle();
       modalAction.addEventListener("click", () => closeModal("action"));
@@ -3017,6 +3220,7 @@
           run.tones.clear();
         }
         function restoreMapMusic(run) {
+          if (collectMusicOwner === run) collectMusicOwner = null;
           if (run?.restoreMapMusic) {
             run.restoreMapMusic = false;
             pendingMapMusicRestore = true;
@@ -3375,9 +3579,10 @@
           focusGameControl(2);
           run.endTimer = window.setTimeout(() => finish(run), run.duration);
           run.frame = requestAnimationFrame((time) => tick(run, time));
-          run.restoreMapMusic = Boolean(backgroundMusicSource) || pendingMapMusicRestore;
+          run.restoreMapMusic = backgroundMusicWanted || pendingMapMusicRestore;
           pendingMapMusicRestore = false;
-          stopBackgroundMusic();
+          collectMusicOwner = run;
+          stopBackgroundMusic(true);
           prepareCollectAudio(run);
         }
         boardGames.set(2, { id: 2, name: "收集金幣", icon: "🪙", modes: Object.keys(MODES), dialog, open: openCollect, close: closeCollect });
